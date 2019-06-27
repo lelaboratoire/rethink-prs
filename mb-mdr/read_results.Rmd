@@ -1,0 +1,42 @@
+---
+title: "Read in results"
+output: html_document
+---
+```{r}
+library(data.table)
+library(dplyr)
+```
+
+
+```{r}
+mdr_path <- here::here('mb-mdr/')
+
+raw_model <- paste0(mdr_path, 'sim1_models.txt') %>%
+  fread(fill=TRUE)
+
+output <- paste0(mdr_path, 'sim1_output.txt') %>%
+  fread(header = F, skip = 3, col.names = c('ma1', 'ma2', 'chi_sq', 'p_val'))
+```
+
+
+```{r}
+row_2d <- 14
+row_model <- floor(nrow(raw_model)/row_2d)
+mdr_model <- list()
+
+for (i in seq(row_model)){
+  idx <- row_2d * (i-1) + 1
+  ma_names <- paste(raw_model[idx, 1:2], collapse = '_')
+  mdr_model[[ma_names]] <- list(
+    affected = as_tibble(raw_model[idx + (2:4), ]),
+    unaffected = as_tibble(raw_model[idx + (6:8), ]),
+    HLO = as_tibble(raw_model[idx + (10:12), ]) %>%
+      map_df(~ recode(.x, L = -1, H = 1, O = 0))
+  )
+}
+
+```
+
+
+
+
