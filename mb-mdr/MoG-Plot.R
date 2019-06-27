@@ -16,7 +16,7 @@ library("GenomicFeatures") #to construct dabase of the transcripts
 library("GenomicRanges") #to use the select command
 
 # Constructing a database of the transcripts/genes based on the human genome version 19
-dbTransc_hg19 = makeTranscriptDbFromUCSC(genome="hg19", tablename="knownGene", url="http://genome-mirror.moma.ki.au.dk/")
+dbTransc_hg19 = makeTxDbFromUCSC(genome="hg19", tablename="knownGene", url="http://genome-mirror.moma.ki.au.dk/")
 tx <- transcriptsBy(dbTransc_hg19, "gene") #extract all genes from the database
 seqtx <- as.data.frame(seqinfo(tx)) #create a dataframe linking chrom numbers with number of positions
 pairsinchromx <- seqtx$seqlength[1:22]
