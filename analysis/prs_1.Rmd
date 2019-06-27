@@ -17,7 +17,7 @@ alpha <- 1 # pvalue threshold
 Try dataset 3:
 
 ```{r}
-i <- 2
+i <- 1
 file_i <- filenames[i]
 dat_i <- data.table::fread(file_i)
 nvars <- ncol(dat_i) - 1
@@ -58,7 +58,8 @@ stir.results <- npdr('Class', dat_i, regression.type="binomial",
 betas_stir_i <- stir.results %>%
   filter(beta.Z.att > 0) %>%
   merge(coef_i, by.x = 'att', by.y = 'row.names') %>%
-  mutate(betas_multiplied = beta.Z.att * beta_univar)
+  mutate(beta.Z.att.scaled = scale(beta.Z.att, center = F, scale = T)) %>%
+  mutate(betas_multiplied = beta.Z.att.scaled * sign(beta_univar))
 
 prs_stir_i <- dat_i %>%
   dplyr::select(betas_stir_i$att) %>%
