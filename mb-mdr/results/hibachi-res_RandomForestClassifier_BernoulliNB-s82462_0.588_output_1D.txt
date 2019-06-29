@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_RandomForestClassifier_BernoulliNB-s82462_0.588.txt
+Computation options used: -p 999 -r 778912021 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X9                 85.276     0.001
+X7                 83.556     0.001
+X4                  4.650     0.467
+X0                  0         1
+X1                  0         1
+X2                  0         1
+X3                  0         1
+X5                  0         1
+X6                  0         1
+X8                  0         1

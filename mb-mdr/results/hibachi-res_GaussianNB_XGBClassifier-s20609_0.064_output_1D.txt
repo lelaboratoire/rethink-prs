@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_GaussianNB_XGBClassifier-s20609_0.064.txt
+Computation options used: -p 999 -r 742188726 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X2                 20.084     0.001
+X8                  7.701     0.108
+X5                  6.854     0.166
+X3                  5.762     0.265
+X9                  4.521     0.388
+X7                  4.481     0.388
+X0                  3.941     0.388
+X4                  3.706     0.388
+X1                  0         1
+X6                  0         1

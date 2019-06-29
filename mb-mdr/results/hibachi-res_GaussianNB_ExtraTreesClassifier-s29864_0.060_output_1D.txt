@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_GaussianNB_ExtraTreesClassifier-s29864_0.060.txt
+Computation options used: -p 999 -r 736558381 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X3                 4.338      0.638
+X2                 3.549      0.793
+X6                 2.799      0.867
+X0                 0          1
+X1                 0          1
+X4                 0          1
+X5                 0          1
+X7                 0          1
+X8                 0          1
+X9                 0          1

@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_LogisticRegression_KNeighborsClassifier-s5516_0.064.txt
+Computation options used: -p 999 -r 766441227 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X0                 60.265     0.001
+X7                  4.8       0.519
+X6                  4.363     0.569
+X2                  3.436     0.71
+X9                  3.140     0.713
+X1                  0         1
+X3                  0         1
+X4                  0         1
+X5                  0         1
+X8                  0         1

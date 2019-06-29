@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_BernoulliNB_DecisionTreeClassifier-s81895_0.096.txt
+Computation options used: -p 999 -r 705717536 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X9                 7.771      0.133
+X6                 3.208      0.806
+X5                 2.908      0.835
+X0                 0          1
+X1                 0          1
+X2                 0          1
+X3                 0          1
+X4                 0          1
+X7                 0          1
+X8                 0          1

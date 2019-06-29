@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_LogisticRegression_RandomForestClassifier-s6645_0.064.txt
+Computation options used: -p 999 -r 768676558 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X9                 324.503    0.001
+X2                   4.159    0.607
+X1                   3.364    0.75
+X0                   0        1
+X3                   0        1
+X4                   0        1
+X5                   0        1
+X6                   0        1
+X7                   0        1
+X8                   0        1

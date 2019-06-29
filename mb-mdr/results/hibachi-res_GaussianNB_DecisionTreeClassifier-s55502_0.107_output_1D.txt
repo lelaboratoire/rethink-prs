@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_GaussianNB_DecisionTreeClassifier-s55502_0.107.txt
+Computation options used: -p 999 -r 735566768 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X9                 40.865     0.001
+X0                 14.026     0.006
+X1                 12.854     0.008
+X5                 12.076     0.017
+X4                  8.715     0.058
+X3                  4.900     0.322
+X6                  3.844     0.4
+X2                  0         1
+X7                  0         1
+X8                  0         1

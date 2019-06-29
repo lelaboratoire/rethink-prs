@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_GaussianNB_RandomForestClassifier-s5138_0.074.txt
+Computation options used: -p 999 -r 741583674 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X6                 12.223     0.016
+X2                  4.566     0.542
+X0                  0         1
+X1                  0         1
+X3                  0         1
+X4                  0         1
+X5                  0         1
+X7                  0         1
+X8                  0         1
+X9                  0         1

@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_XGBClassifier_GradientBoostingClassifier-s41351_0.459.txt
+Computation options used: -p 999 -r 792592919 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X5                 8.513      0.099
+X1                 4.933      0.447
+X4                 2.918      0.829
+X0                 0          1
+X2                 0          1
+X3                 0          1
+X6                 0          1
+X7                 0          1
+X8                 0          1
+X9                 0          1

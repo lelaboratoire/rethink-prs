@@ -1,0 +1,13 @@
+Input File: reformated-data/hibachi-res_DecisionTreeClassifier_KNeighborsClassifier-s70454_0.440.txt
+Computation options used: -p 999 -r 720406854 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X5                 55.847     0.001
+X0                  4.521     0.548
+X1                  4.250     0.562
+X4                  3.134     0.76
+X2                  0         1
+X3                  0         1
+X6                  0         1
+X7                  0         1
+X8                  0         1
+X9                  0         1
