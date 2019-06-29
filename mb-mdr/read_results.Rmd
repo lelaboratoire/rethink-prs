@@ -2,20 +2,29 @@
 title: "Read in results"
 output: html_document
 ---
+
 ```{r}
 library(data.table)
 library(dplyr)
+library(purrr)
+library(ggplot2)
+library(tidyr)
 ```
 
 
 ```{r}
-mdr_path <- here::here('mb-mdr/')
+mdr_path <- here::here('mb-mdr', 'results')
+data_dir <- here::here('mb-mdr', 'reformated-data')
+filenames <- list.files(data_dir, pattern = '*.txt', full.names = T)
+filename <- filenames[1]
 
-raw_model <- paste0(mdr_path, 'sim1_models.txt') %>%
-  fread(fill=TRUE)
-
-output <- paste0(mdr_path, 'sim1_output.txt') %>%
-  fread(header = F, skip = 3, col.names = c('ma1', 'ma2', 'chi_sq', 'p_val'))
+dat <- fread(filename) %>% data.frame()
+snp_dat <- select(dat, - Class)
+raw_model <- paste0(mdr_path, filename, '_models_2D.txt') %>%
+  fread(fill = T, header = F) %>% data.frame()
+chisq_df <- paste0(mdr_path, filename, '_output_2D.txt') %>%
+  fread(header = F, skip = 3, col.names = c('ma1', 'ma2', 'chi_sq', 'p_val')) %>%
+  mutate(ma_names = paste(ma1, ma2, sep = '_'))
 ```
 
 
@@ -31,12 +40,46 @@ for (i in seq(row_model)){
     affected = as_tibble(raw_model[idx + (2:4), ]),
     unaffected = as_tibble(raw_model[idx + (6:8), ]),
     HLO = as_tibble(raw_model[idx + (10:12), ]) %>%
-      map_df(~ recode(.x, L = -1, H = 1, O = 0))
+      map_df(~ recode(.x, L = -1, H = 1, O = 0)) %>%
+      as.matrix()
   )
 }
 
 ```
 
+Each subject: chisq * (their value at snp1_snp2)
+Q: How compatible is this compared to -d 1D?
+TODO: split into training + testing
 
+```{r}
+risk_vec <- vector(mode = 'numeric', length = nrow(snp_dat))
+
+for (subj_idx in seq(nrow(snp_dat))){
+  sum = 0
+  for (i in seq(nrow(chisq_df))){
+    ma_pair <- chisq_df$ma_names[i]
+    chi_sq <- chisq_df$chi_sq[i]
+    
+    mas <- strsplit(ma_pair, '_') %>% unlist # SNPs names
+    snp1_val <- snp_dat[subj_idx, mas[1]] 
+    snp2_val <- snp_dat[subj_idx, mas[2]]
+    
+    hlo <- mdr_model[[ma_pair]]$HLO
+    sum <- sum + hlo[snp1_val + 1, snp2_val + 1]*chi_sq # check order here
+  }
+  risk_vec[subj_idx] <- sum
+}
+```
+
+
+```{r}
+result_df <- data.frame(risk_vec, dat) 
+result_df %>%
+  mutate(Class = as.factor(Class)) %>%
+  ggplot(aes(x = Class, y = risk_vec, fill = Class)) +
+  geom_boxplot()
+
+cor.test(result_df$Class, result_df$risk_vec)
+```
 
 
