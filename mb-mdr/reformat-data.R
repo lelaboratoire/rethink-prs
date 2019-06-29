@@ -13,5 +13,5 @@ for (filename in filenames){
   paste(data_dir, filename, sep = '/') %>%
     fread() %>%
     dplyr::select(Class, paste0('X', 0:9)) %>%
-    fwrite(paste0(mdr_path, 'reformated-data/', filename), sep = '\t')
+    fwrite(paste0(mdr_path, 'reformatted-data/', filename), sep = '\t')
 }
