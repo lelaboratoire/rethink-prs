@@ -10,12 +10,21 @@ library(here)
 ```
 
 ```{r}
+plot_ex <- F # plot an example risk comparisons
+```
+
+
+```{r}
 filenames <- list.files(
   here('mb-mdr', 'reformatted-data'), 
   pattern = '*.txt', full.names = F)
 
 sub_name <- function(filetype, my_file){
   gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
+}
+
+read_risks <- function(filetype, my_file){
+  fread(here('mb-mdr', 'risks', sub_name(filetype, filename)))
 }
 ```
 
@@ -25,24 +34,34 @@ sub_name <- function(filetype, my_file){
 i <- 0
 t_ori <- vector(mode = 'numeric', length = length(filenames))
 t_2d <- vector(mode = 'numeric', length = length(filenames))
+t_1d <- vector(mode = 'numeric', length = length(filenames))
 # filename <- filenames[103]
 for (filename in filenames){
   i <- i + 1
-  risk_2d <- fread(here('mb-mdr', 'risks', sub_name('risk_2D', filename)))
-  risk_ori <- fread(here('mb-mdr', 'risks', sub_name('risk_ori', filename)))
-  all_risks <- left_join(risk_2d, risk_ori, by = c('Subj', 'Class'))
-  all_risks %>%
-    gather('RiskType', 'Risk', risk_2d, risk_ori) %>%
-    mutate(Class = as.factor(Class)) %>%
-    ggplot(aes(x = RiskType, y = Risk, fill = Class)) +
-    geom_boxplot()
+  risk_1d <- read_risks('risk_1D', filename)
+  risk_2d <- read_risks('risk_2D', filename)
+  risk_ori <- read_risks('risk_ori', filename)
+  all_risks <- list(risk_1d, risk_2d, risk_ori) %>%
+    reduce(left_join, by = c('Subj', 'Class'))
+  
+  # plot example
+  if (plot_ex & i == 1){ # plot the first comparison
+    all_risks %>%
+      gather('RiskType', 'Risk', risk_1d, risk_2d, risk_ori) %>%
+      mutate(Class = as.factor(Class)) %>%
+      ggplot(aes(x = RiskType, y = Risk, fill = Class)) +
+      geom_boxplot()
+  }
+
+  
   ctrls <- filter(all_risks, Class == 0)
   cases <- filter(all_risks, Class == 1)
   t_ori[i] <- t.test(x = cases$risk_ori, y = ctrls$risk_ori, 'greater')$statistic
   t_2d[i] <- t.test(x = cases$risk_2d, y = ctrls$risk_2d, 'greater')$statistic
+  t_1d[i] <- t.test(x = cases$risk_1d, y = ctrls$risk_1d, 'greater')$statistic
 }
 
-data.frame(t_ori, t_2d) %>%
+data.frame(t_ori, t_2d, t_1d) %>%
   gather('RiskType', 'Risk') %>%
   ggplot(aes(x = RiskType, y = Risk)) +
   geom_boxplot()
