@@ -16,6 +16,7 @@ Each subject risk score = chi_sq * (their value (HLO) at snp1_snp2)
 ```{r}
 rm(list = ls())
 row_1d <- 8
+p_threshold <- 1
 
 filenames <- list.files(here('mb-mdr', 'reformatted-data'), 
                         pattern = '*.txt', full.names = F)
@@ -25,7 +26,6 @@ sub_name <- function(filetype, my_file){
 }
 
 for (filename in filenames){
-  # (filename <- filenames[3])
   mod_file <- sub_name('model_1D', filename)
   out_file <- sub_name('output_1D', filename)
   risk_file <- sub_name('risk_1D', filename)
@@ -41,7 +41,6 @@ for (filename in filenames){
           col.names = c('ma1', 'chi_sq', 'p_val'))
   
   snp_dat <- select(dat, - Class)
-  
   nrow_model <- floor(nrow(raw_model)/row_1d)
   mdr_model <- list()
   
@@ -63,23 +62,26 @@ for (filename in filenames){
   
   for (subj_idx in seq(nrow(snp_dat))){
     sum = 0
-    for (i in seq(nrow(chisq_df))){
-      ma <- chisq_df$ma1[i] # e.g. X4
-      chi_sq <- chisq_df$chi_sq[i] # chi-squared values of that SNP comb
-      snp1_val <- snp_dat[subj_idx, ma]
-      hlo <- mdr_model[[ma]]$HLO
-      sum <- sum + hlo[snp1_val + 1]*chi_sq # check order here
+    for (j in seq(nrow(chisq_df))){
+      if (chisq_df$p_val[j] < p_threshold){
+        ma <- chisq_df$ma1[j] # e.g. X4
+        chi_sq <- chisq_df$chi_sq[j] # chi-squared values of that SNP comb
+        
+        snp1_val <- snp_dat[subj_idx, ma]
+        hlo <- mdr_model[[ma]]$HLO
+        sum <- sum + hlo[snp1_val + 1]*chi_sq # check order here
+      }
     }
     risk_1d[subj_idx] <- sum
   }
   
   result_df <- data.frame(risk_1d, dat) 
-  result_df %>%
-    mutate(Class = as.factor(Class)) %>%
-    ggplot(aes(x = Class, y = risk_1d, fill = Class)) +
-    geom_boxplot()
+  # result_df %>%
+  #   mutate(Class = as.factor(Class)) %>%
+  #   ggplot(aes(x = Class, y = risk_1d, fill = Class)) +
+  #   geom_boxplot()
   
-  cor.test(result_df$Class, result_df$risk_1d)
+  # cor.test(result_df$Class, result_df$risk_1d)
   
   result_df %>% 
     rownames_to_column('Subj') %>%
