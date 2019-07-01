@@ -17,90 +17,101 @@ library(here)
 3D results:
 
 ```{r}
+rm(list = ls())
 results_dir <- here('mb-mdr', 'results')
 filenames <- list.files(here('mb-mdr', 'reformatted-data'), 
                         pattern = '*.txt', full.names = F)
-filename <- filenames[3]
-mod_file <- gsub('.txt', '_model_3D.txt', filename)
-out_file <- gsub('.txt', '_output_3D.txt', filename)
+sub_name <- function(filetype, my_file){
+  gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
+}
 
-# shortfile <- shortfiles[1900]
-dat <- here('mb-mdr', 'reformatted-data', filename) %>% 
-  fread() %>% 
-  data.frame()
-raw_model <- here('mb-mdr', 'results', mod_file) %>%
-  fread(fill = T, header = F) %>%
-  data.frame()
-chisq_df <- here('mb-mdr', 'results', out_file) %>%
-  fread(header = F, skip = 3, 
-        col.names = c('ma1', 'ma2', 'ma3', 'chi_sq', 'p_val')) %>%
-  mutate(ma_names = paste(ma1, ma2, ma3, sep = '_'))
-
-snp_dat <- select(dat, - Class)
+# filename <- filenames[3]
 row_3d <- 41
 sub_row_3d <- 13
-nrow_model <- floor(nrow(raw_model)/row_3d)
-mdr_model <- list()
-
-for (i in seq(nrow_model)){
-  idx <- row_3d * (i-1) + 1
-  interact_pairs <- combn(c(1, 2, 3), 2) # make combinations
   
-  for (pair_idx in seq(ncol(interact_pairs))){
-    pair <- interact_pairs[, pair_idx]
-    all_ma_names <- paste(raw_model[idx, ], collapse = '_')
-    ma_names <- paste(raw_model[idx, pair], collapse = '_')
-    # jump from one pair to the next
-    sub_idx <- idx + (2:4) + (pair_idx - 1)*4 
+for (filename in filenames){
+  mod_file <- sub_name('model_3D', filename)
+  out_file <- sub_name('output_3D', filename)
+  risk_file <- sub_name('risk_3D', filename)
+  
+  # shortfile <- shortfiles[1900]
+  dat <- here('mb-mdr', 'reformatted-data', filename) %>% 
+    fread() %>% 
+    data.frame()
+  raw_model <- here('mb-mdr', 'results', mod_file) %>%
+    fread(fill = T, header = F) %>%
+    data.frame()
+  chisq_df <- here('mb-mdr', 'results', out_file) %>%
+    fread(header = F, skip = 3, 
+          col.names = c('ma1', 'ma2', 'ma3', 'chi_sq', 'p_val')) %>%
+    mutate(ma_names = paste(ma1, ma2, ma3, sep = '_'))
+  
+  snp_dat <- select(dat, - Class)
+  nrow_model <- floor(nrow(raw_model)/row_3d)
+  mdr_model <- list()
+  
+  # parse data
+  for (i in seq(nrow_model)){
+    idx <- row_3d * (i-1) + 1
+    interact_pairs <- combn(c(1, 2, 3), 2) # make combinations
     
-    mdr_model[[all_ma_names]][[ma_names]] <- list(
-      affected = as_tibble(raw_model[sub_idx, ]),
-      unaffected = as_tibble(raw_model[sub_idx + sub_row_3d, ]),
-      HLO = as_tibble(raw_model[sub_idx + sub_row_3d * 2, ]) %>%
-        map_df(~ recode(.x, L = -1, H = 1, O = 0)) %>%
-        as.matrix()
-  )    
-  }
-}
-```
-
-
-
-```{r}
-risk_3d <- vector(mode = 'numeric', length = nrow(snp_dat))
-i = 1
-
-for (subj_idx in seq(nrow(snp_dat))){
-  sum = 0
-  for (i in seq(nrow(chisq_df))){
-    ma_tripple <- chisq_df$ma_names[i]
-    ma_pairs <- chisq_df[i, paste0('ma', 1:3)] %>%
-      combn(2) %>%
-      apply(2, function(x) paste(x, collapse = '_'))
-    chi_sq <- chisq_df$chi_sq[i]
-    
-    for (ma_pair in ma_pairs){
-      # can I do multiple assignments here?
-      mas2 <- strsplit(ma_pair, '_') %>% unlist # SNPs names
-      snp1_val <- snp_dat[subj_idx, mas2[1]] 
-      snp2_val <- snp_dat[subj_idx, mas2[2]]
+    for (pair_idx in seq(ncol(interact_pairs))){
+      pair <- interact_pairs[, pair_idx]
+      all_ma_names <- paste(raw_model[idx, ], collapse = '_')
+      ma_names <- paste(raw_model[idx, pair], collapse = '_')
+      # jump from one pair to the next
+      sub_idx <- idx + (2:4) + (pair_idx - 1)*4 
       
-      hlo <- mdr_model[[ma_tripple]][[ma_pair]]$HLO
-      sum <- sum + hlo[snp1_val + 1, snp2_val + 1]*chi_sq # check order here      
+      mdr_model[[all_ma_names]][[ma_names]] <- list(
+        affected = as_tibble(raw_model[sub_idx, ]),
+        unaffected = as_tibble(raw_model[sub_idx + sub_row_3d, ]),
+        HLO = as_tibble(raw_model[sub_idx + sub_row_3d * 2, ]) %>%
+          map_df(~ recode(.x, L = -1, H = 1, O = 0)) %>%
+          as.matrix()
+      )    
     }
   }
-  risk_3d[subj_idx] <- sum
+  
+  # calculate risk
+  risk_3d <- vector(mode = 'numeric', length = nrow(snp_dat))
+  for (subj_idx in seq(nrow(snp_dat))){
+    sum = 0
+    for (i in seq(nrow(chisq_df))){
+      ma_tripple <- chisq_df$ma_names[i]
+      ma_pairs <- chisq_df[i, paste0('ma', 1:3)] %>%
+        combn(2) %>%
+        apply(2, function(x) paste(x, collapse = '_'))
+      chi_sq <- chisq_df$chi_sq[i]
+      
+      for (ma_pair in ma_pairs){
+        # can I do multiple assignments here?
+        mas2 <- strsplit(ma_pair, '_') %>% unlist # SNPs names
+        snp1_val <- snp_dat[subj_idx, mas2[1]] 
+        snp2_val <- snp_dat[subj_idx, mas2[2]]
+        
+        hlo <- mdr_model[[ma_tripple]][[ma_pair]]$HLO
+        sum <- sum + hlo[snp1_val + 1, snp2_val + 1]*chi_sq # check order here      
+      }
+    }
+    risk_3d[subj_idx] <- sum
+  }
+  
+  result_df <- data.frame(risk_3d, dat) 
+  # result_df %>%
+  #   mutate(Class = as.factor(Class)) %>%
+  #   ggplot(aes(x = Class, y = risk_3d, fill = Class)) +
+  #   geom_boxplot()
+  
+  cor.test(result_df$Class, result_df$risk_3d)
+  
+  result_df %>% 
+    rownames_to_column('Subj') %>%
+    dplyr::select(Subj, Class, risk_3d) %>%
+    fwrite(here('mb-mdr', 'risks', risk_file))
 }
-```
 
-```{r}
-result_df <- data.frame(risk_vec, dat) 
-result_df %>%
-  mutate(Class = as.factor(Class)) %>%
-  ggplot(aes(x = Class, y = risk_vec, fill = Class)) +
-  geom_boxplot()
 
-cor.test(result_df$Class, result_df$risk_vec)
+  
 ```
 
 
