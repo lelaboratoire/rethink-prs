@@ -11,12 +11,14 @@ library(here)
 
 ```{r}
 plot_ex <- T # plot an example risk comparisons
+cbbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
+                "#0072B2", "#D55E00", "#CC79A7", "#c5679b", "#be548f")
 ```
 
 
 ```{r}
 filenames <- list.files(
-  here('mb-mdr', 'reformatted-data'), 
+  here('mb-mdr', 'reformatted-data', 'test'), 
   pattern = '*.txt', full.names = F)
 
 sub_name <- function(filetype, my_file){
@@ -47,8 +49,9 @@ t_1d <- tibble()
 # filename <- filenames[103]
 for (filename in filenames){
   i <- i + 1
-  risk_1d <- read_risks('risk_1D', filename)
+  # risk_1d <- read_risks('risk_1D', filename)
   risk_2d <- read_risks('risk_2D', filename)
+  risk_1d <- risk_2d %>% rename(risk_1d = 'risk_2d') # to be commented out
   risk_ori <- read_risks('risk_ori', filename)
   all_risks <- list(risk_1d, risk_2d, risk_ori) %>%
     reduce(left_join, by = c('Subj', 'Class'))
@@ -132,9 +135,11 @@ roc_compare_rf <- t.test(auroc_npdr_cc, auroc_rf_cc)
 print(roc_compare_relief$p.value)
 roc_p <- round(roc_compare_relief$p.value, 3)
 print(roc_compare_rf$p.value)
-  ss_npdr <- pROC::roc(test.df$functional, test.df$beta.Z.att)
-  ss_relief <- pROC::roc(test.df$functional, test.df$rrelief)
-  ss_rf <- pROC::roc(rf_imp_cc$functional, rf_imp_cc$MeanDecreaseAccuracy)
+
+
+ss_npdr <- pROC::roc(test.df$functional, test.df$beta.Z.att)
+ss_relief <- pROC::roc(test.df$functional, test.df$rrelief)
+ss_rf <- pROC::roc(rf_imp_cc$functional, rf_imp_cc$MeanDecreaseAccuracy)
   
   
 ```
@@ -142,39 +147,110 @@ print(roc_compare_rf$p.value)
 
 
 ```{r}
-  pr_npdr <- PRROC::pr.curve(scores.class0 = test.df %>% 
-                        filter(functional == T) %>% 
-                        pull(beta.Z.att),
-                      scores.class1 = test.df %>% 
-                        filter(functional == F) %>% 
-                        pull(beta.Z.att), 
-                      curve = T)
-  pr_relief <- PRROC::pr.curve(scores.class0 = test.df %>% 
-                        filter(functional == T) %>% 
-                        pull(rrelief), 
-                      scores.class1 = test.df %>% 
-                        filter(functional == F) %>% 
-                        pull(rrelief), 
-                      curve = T)
-  pr_rf <- PRROC::pr.curve(scores.class0 = rf_imp_cc %>% 
-                        filter(functional == T) %>% 
-                        pull(MeanDecreaseAccuracy), 
-                      scores.class1 = rf_imp_cc %>% 
-                        filter(functional == F) %>% 
-                        pull(MeanDecreaseAccuracy),
-                      curve = T)
+roc_func <- function(risk_type){
+  PRROC::roc.curve(scores.class0 = all_risks[, risk_type],
+                   weights.class0 = all_risks$Class,
+                   curve = T)
+}
+
+pr_func <- function(risk_type){
+  PRROC::pr.curve(scores.class0 = all_risks[, risk_type],
+                   weights.class0 = all_risks$Class,
+                   curve = T)
+}
+# case_risks <- filter(all_risks, Class == 1)
+# ctrl_risks <- filter(all_risks, Class == 0)
+pr_ori <- pr_func('risk_ori')
+pr_2d <- pr_func('risk_2d')
+pr_1d <- pr_func('risk_1d')
   
-  
-pr_df <- data.frame(aupr = c(pr_relief_vec, pr_npdr_vec, pr_rf_vec),
-                    type = rep(c('RRelief', 'NPDR', 'Random forest'), each = n_sims))
-pr_df$type <- factor(pr_df$type, levels = rev(levels(pr_df$type)))
-summary(r2_vec)
-summary(r2_rf_vec)
-pr_compare_relief <- t.test(pr_npdr_vec, pr_relief_vec)
-pr_compare_rf <- t.test(pr_npdr_vec, pr_rf_vec)
-print(pr_compare_relief$p.value)
-pr_p <- round(pr_compare_relief$p.value, 3)
-print(pr_compare_rf$p.value)
+roc_ori <- roc_func('risk_ori')
+roc_2d <- roc_func('risk_2d')
+roc_1d <- roc_func('risk_1d')
+
+pr_ori$auc.integral
+```
+
+```{r}
+pr_text <- data.frame(
+  label = c(
+    paste0('Original risk \n', c(round(pr_ori$auc.integral, 3))),
+    paste0('MB-MDR 1D \n ', round(pr_1d$auc.integral, 3)),
+    paste0('MB-MDR 2D \n', round(pr_2d$auc.integral, 3))
+    # paste0('NPDR\n', round(auprc_npdr_qtrait, 3)),
+    # paste0('NPDR\n   ', round(auprc_npdr_cc, 3))
+    ),
+  # sim = rep(c('Continuous outcome', 'Dichotomous outcome'), 3),
+  x = c(0.3, 0.6, 0.3),
+  y = c(0.45, 0.65, 0.78),
+  type = c('Original', '1D', '2D')
+)
+
+prr_ori <- as.data.frame(pr_ori$curve)
+colnames(prr_ori) <- paste0(c('Recall', 'Precision', 'w'))
+prr_2d <- as.data.frame(pr_2d$curve)
+colnames(prr_2d) <- paste0(c('Recall', 'Precision', 'w'))
+prr_1d <- as.data.frame(pr_1d$curve)
+colnames(prr_1d) <- paste0(c('Recall', 'Precision', 'w'))
+
+pr <- rbind(prr_ori, prr_2d, prr_1d) %>% 
+  mutate(type = c(rep('Original', nrow(prr_ori)), 
+                  rep('2D', nrow(prr_2d)),
+                  rep('1D', nrow(prr_1d)))) %>%
+  ggplot(aes(Recall, Precision, color = type)) +
+  geom_path(size = 0.8) + theme_bw() + 
+  scale_color_manual(values = cbbPalette[c(8,3,6)]) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = seq(0, 1.1, 0.2), labels = scales::percent) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent) +
+  geom_text(pr_text, mapping = aes(x = x, y = y, label = label), size = 3) +
+  coord_fixed(ratio = 1) +
+  guides(color = FALSE)
+
+ggsave(pr, filename = 'figs/test1.pdf', height = 4, width = 4)
+```
+
+
+auROC:
+
+```{r}
+roc_text <- data.frame(
+  label = c(
+    paste0('Original risk \n', c(round(roc_ori$auc, 3))),
+    paste0('MB-MDR 1D \n ', round(roc_1d$auc, 3)),
+    paste0('MB-MDR 2D \n', round(roc_2d$auc, 3))
+    # paste0('NPDR\n', round(aurocc_npdr_qtrait, 3)),
+    # paste0('NPDR\n   ', round(aurocc_npdr_cc, 3))
+    ),
+  # sim = rep(c('Continuous outcome', 'Dichotomous outcome'), 3),
+  x = c(0.55, 0.2 , 0.45),
+  y = c(0.4, 0.5, 0.75),
+  type = c('Original', '1D', '2D')
+)
+
+rocr_ori <- as.data.frame(roc_ori$curve)
+colnames(rocr_ori) <- paste0(c('Recall', 'Precision', 'w'))
+rocr_2d <- as.data.frame(roc_2d$curve)
+colnames(rocr_2d) <- paste0(c('Recall', 'Precision', 'w'))
+rocr_1d <- as.data.frame(roc_1d$curve)
+colnames(rocr_1d) <- paste0(c('Recall', 'Precision', 'w'))
+
+roc <- rbind(rocr_ori, rocr_2d, rocr_1d) %>% 
+  mutate(type = c(rep('Original', nrow(rocr_ori)), 
+                  rep('2D', nrow(rocr_2d)),
+                  rep('1D', nrow(rocr_1d)))) %>%
+  # mutate(sim = c(rep('Continuous outcome', nrow(roc_qtrait)), 
+  #                rep('Dichotomous outcome', nrow(roc_cc)))) %>%
+  ggplot(aes(Recall, Precision, color = type)) +
+  geom_path(size = 0.8) + theme_bw() + 
+  scale_color_manual(values = cbbPalette[c(8,3,6)]) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = seq(0, 1.1, 0.2), labels = scales::percent) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent) +
+  geom_text(roc_text, mapping = aes(x = x, y = y, label = label), size = 3) +
+  coord_fixed(ratio = 1) +
+  guides(color = FALSE)
+roc
+
+ggsave(roc, filename = 'figs/test1.pdf', height = 4, width = 4)
 
 ```
 
