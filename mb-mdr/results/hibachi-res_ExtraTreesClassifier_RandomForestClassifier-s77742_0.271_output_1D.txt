@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_ExtraTreesClassifier_RandomForestClassifier-s77742_0.271.txt
-Computation options used: -p 999 -r 733129753 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_ExtraTreesClassifier_RandomForestClassifier-s77742_0.271.txt
+Computation options used: -p 999 -r 1325251498 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X5                 9.228      0.061
-X0                 6.400      0.235
-X2                 5.777      0.286
-X1                 4.901      0.397
-X7                 3.476      0.616
+X2                 7.598      0.159
+X8                 6.275      0.252
+X6                 6.000      0.252
+X0                 5.437      0.303
+X5                 5.136      0.303
+X7                 3.975      0.435
+X1                 3.935      0.435
 X3                 0          1
 X4                 0          1
-X6                 0          1
-X8                 0          1
 X9                 0          1

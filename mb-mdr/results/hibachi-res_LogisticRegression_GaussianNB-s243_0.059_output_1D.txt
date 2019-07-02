@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_LogisticRegression_GaussianNB-s243_0.059.txt
-Computation options used: -p 999 -r 763920177 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_LogisticRegression_GaussianNB-s243_0.059.txt
+Computation options used: -p 999 -r 1346159406 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X0                 5.712      0.373
-X6                 4.774      0.506
-X9                 3.289      0.785
+X6                 4.431      0.608
+X0                 3.963      0.675
+X3                 3.333      0.743
 X1                 0          1
 X2                 0          1
-X3                 0          1
 X4                 0          1
 X5                 0          1
 X7                 0          1
 X8                 0          1
+X9                 0          1

@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_MLPClassifier_BernoulliNB-s16241_0.609.txt
-Computation options used: -p 999 -r 770088346 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_MLPClassifier_BernoulliNB-s16241_0.609.txt
+Computation options used: -p 999 -r 1350193086 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X0                 15.635     0.003
-X4                  8.411     0.086
-X3                  7.230     0.158
-X9                  5.949     0.241
-X1                  0         1
-X2                  0         1
-X5                  0         1
-X6                  0         1
-X7                  0         1
-X8                  0         1
+X9                 7.821      0.125
+X3                 4.982      0.467
+X0                 4.088      0.577
+X1                 0          1
+X2                 0          1
+X4                 0          1
+X5                 0          1
+X6                 0          1
+X7                 0          1
+X8                 0          1

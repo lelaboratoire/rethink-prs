@@ -19,7 +19,7 @@ library(here)
 ```{r}
 rm(list = ls())
 results_dir <- here('mb-mdr', 'results')
-filenames <- list.files(here('mb-mdr', 'reformatted-data'), 
+filenames <- list.files(here('mb-mdr', 'reformatted-data', 'test'), 
                         pattern = '*.txt', full.names = F)
 sub_name <- function(filetype, my_file){
   gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
@@ -47,7 +47,7 @@ for (filename in filenames){
     mutate(ma_names = paste(ma1, ma2, ma3, sep = '_'))
   
   snp_dat <- select(dat, - Class)
-  nrow_model <- floor(nrow(raw_model)/row_3d)
+  nrow_model <- floor((nrow(raw_model) + 1)/row_2d)
   mdr_model <- list()
   
   # parse data

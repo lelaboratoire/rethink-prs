@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_KNeighborsClassifier_MLPClassifier-s54740_0.114.txt
-Computation options used: -p 999 -r 758054534 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_KNeighborsClassifier_MLPClassifier-s54740_0.114.txt
+Computation options used: -p 999 -r 1342428252 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X7                 42.949     0.001
-X1                 31.036     0.001
-X8                 18.516     0.002
-X5                 18.289     0.002
-X0                 15.876     0.003
-X2                  0         1
-X3                  0         1
+X7                 28.837     0.001
+X8                 14.414     0.003
+X1                 11.778     0.013
+X5                 10.195     0.028
+X0                  6.307     0.166
+X3                  6.101     0.171
+X2                  2.920     0.58
+X6                  2.895     0.58
 X4                  0         1
-X6                  0         1
 X9                  0         1

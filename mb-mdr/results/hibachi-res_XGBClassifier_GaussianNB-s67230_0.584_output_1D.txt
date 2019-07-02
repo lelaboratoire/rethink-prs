@@ -1,9 +1,9 @@
-Input File: reformated-data/hibachi-res_XGBClassifier_GaussianNB-s67230_0.584.txt
-Computation options used: -p 999 -r 791718955 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_XGBClassifier_GaussianNB-s67230_0.584.txt
+Computation options used: -p 999 -r 1364630299 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
+X2                 3.866      0.711
 X0                 0          1
 X1                 0          1
-X2                 0          1
 X3                 0          1
 X4                 0          1
 X5                 0          1

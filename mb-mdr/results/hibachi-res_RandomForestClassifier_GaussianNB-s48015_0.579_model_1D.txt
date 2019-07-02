@@ -1,80 +1,80 @@
-X0
+X9
 Affected subjects:
-109 256 135 
+65 108 72 
 Unaffected subjects:
-126 239 135 
+62 137 56 
 HLO matrix:
-O O O 
+O H L 
+
+X5
+Affected subjects:
+63 128 54 
+Unaffected subjects:
+61 118 76 
+HLO matrix:
+O O H 
+
+X8
+Affected subjects:
+55 133 57 
+Unaffected subjects:
+62 118 75 
+HLO matrix:
+O L O 
 
 X1
 Affected subjects:
-132 242 126 
+64 127 54 
 Unaffected subjects:
-137 239 124 
+66 115 74 
+HLO matrix:
+O O H 
+
+X0
+Affected subjects:
+58 128 59 
+Unaffected subjects:
+65 119 71 
 HLO matrix:
 O O O 
 
 X2
 Affected subjects:
-119 252 129 
+58 127 60 
 Unaffected subjects:
-106 269 125 
+60 127 68 
 HLO matrix:
 O O O 
 
 X3
 Affected subjects:
-133 239 128 
+63 121 61 
 Unaffected subjects:
-134 245 121 
+68 117 70 
 HLO matrix:
 O O O 
 
 X4
 Affected subjects:
-128 247 125 
+71 124 50 
 Unaffected subjects:
-125 264 111 
-HLO matrix:
-O O O 
-
-X5
-Affected subjects:
-117 256 127 
-Unaffected subjects:
-126 236 138 
+68 138 49 
 HLO matrix:
 O O O 
 
 X6
 Affected subjects:
-130 244 126 
+63 128 54 
 Unaffected subjects:
-116 259 125 
+60 130 65 
 HLO matrix:
 O O O 
 
 X7
 Affected subjects:
-119 251 130 
+59 135 51 
 Unaffected subjects:
-107 261 132 
-HLO matrix:
-O O O 
-
-X8
-Affected subjects:
-116 258 126 
-Unaffected subjects:
-132 243 125 
-HLO matrix:
-O O O 
-
-X9
-Affected subjects:
-130 238 132 
-Unaffected subjects:
-122 255 123 
+61 130 64 
 HLO matrix:
 O O O 
 

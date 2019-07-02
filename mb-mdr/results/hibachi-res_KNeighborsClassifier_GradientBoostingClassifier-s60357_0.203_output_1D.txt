@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_KNeighborsClassifier_GradientBoostingClassifier-s60357_0.203.txt
-Computation options used: -p 999 -r 755953659 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_KNeighborsClassifier_GradientBoostingClassifier-s60357_0.203.txt
+Computation options used: -p 999 -r 1341083692 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X8                 6.516      0.25
-X0                 2.749      0.89
+X8                 9.303      0.046
+X5                 2.826      0.905
+X0                 0          1
 X1                 0          1
 X2                 0          1
 X3                 0          1
 X4                 0          1
-X5                 0          1
 X6                 0          1
 X7                 0          1
 X9                 0          1

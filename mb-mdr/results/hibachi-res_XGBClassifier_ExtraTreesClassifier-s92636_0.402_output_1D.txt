@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_XGBClassifier_ExtraTreesClassifier-s92636_0.402.txt
-Computation options used: -p 999 -r 790895412 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_XGBClassifier_ExtraTreesClassifier-s92636_0.402.txt
+Computation options used: -p 999 -r 1364092475 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X0                 6.875      0.193
-X2                 4.631      0.517
+X6                 5.721      0.414
+X2                 4.408      0.579
+X7                 3.534      0.713
+X0                 0          1
 X1                 0          1
 X3                 0          1
 X4                 0          1
 X5                 0          1
-X6                 0          1
-X7                 0          1
 X8                 0          1
 X9                 0          1

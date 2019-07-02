@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_MLPClassifier_RandomForestClassifier-s58259_0.513.txt
-Computation options used: -p 999 -r 777029637 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_MLPClassifier_RandomForestClassifier-s58259_0.513.txt
+Computation options used: -p 999 -r 1355117537 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X5                 4.159      0.672
-X7                 3.456      0.753
-X0                 0          1
+X5                 7.765      0.145
+X0                 3.311      0.792
+X6                 2.763      0.852
 X1                 0          1
 X2                 0          1
 X3                 0          1
 X4                 0          1
-X6                 0          1
+X7                 0          1
 X8                 0          1
 X9                 0          1

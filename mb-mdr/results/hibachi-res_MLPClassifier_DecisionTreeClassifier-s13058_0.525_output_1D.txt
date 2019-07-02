@@ -1,8 +1,8 @@
-Input File: reformated-data/hibachi-res_MLPClassifier_DecisionTreeClassifier-s13058_0.525.txt
-Computation options used: -p 999 -r 771197608 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_MLPClassifier_DecisionTreeClassifier-s13058_0.525.txt
+Computation options used: -p 999 -r 1350999822 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
+X1                 3.833      0.739
 X0                 0          1
-X1                 0          1
 X2                 0          1
 X3                 0          1
 X4                 0          1

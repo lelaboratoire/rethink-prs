@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_LogisticRegression_GradientBoostingClassifier-s22095_0.071.txt
-Computation options used: -p 999 -r 765180702 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_LogisticRegression_GradientBoostingClassifier-s22095_0.071.txt
+Computation options used: -p 999 -r 1346966142 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X5                 26.176     0.001
-X1                  3.518     0.788
-X9                  3.378     0.788
-X0                  0         1
-X2                  0         1
-X3                  0         1
-X4                  0         1
-X6                  0         1
-X7                  0         1
-X8                  0         1
+X5                 5.738      0.379
+X3                 5.114      0.416
+X1                 2.927      0.826
+X0                 0          1
+X2                 0          1
+X4                 0          1
+X6                 0          1
+X7                 0          1
+X8                 0          1
+X9                 0          1

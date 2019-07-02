@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_BernoulliNB_GradientBoostingClassifier-s15237_0.060.txt
-Computation options used: -p 999 -r 708289007 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_BernoulliNB_GradientBoostingClassifier-s15237_0.060.txt
+Computation options used: -p 999 -r 1309873093 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X0                 31.209     0.001
-X5                 12.076     0.015
-X1                  0         1
-X2                  0         1
-X3                  0         1
-X4                  0         1
-X6                  0         1
-X7                  0         1
-X8                  0         1
-X9                  0         1
+X0                 9.408      0.05
+X9                 6.050      0.301
+X1                 0          1
+X2                 0          1
+X3                 0          1
+X4                 0          1
+X5                 0          1
+X6                 0          1
+X7                 0          1
+X8                 0          1

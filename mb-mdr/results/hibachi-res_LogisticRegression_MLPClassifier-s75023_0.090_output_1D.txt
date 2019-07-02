@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_LogisticRegression_MLPClassifier-s75023_0.090.txt
-Computation options used: -p 999 -r 767836208 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_LogisticRegression_MLPClassifier-s75023_0.090.txt
+Computation options used: -p 999 -r 1348714070 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X9                 79.865     0.001
-X4                  5.224     0.432
-X5                  4.521     0.549
-X8                  3.178     0.756
-X1                  3.147     0.756
+X9                 27.941     0.001
+X8                  4.641     0.551
+X4                  4.238     0.594
+X1                  2.722     0.842
 X0                  0         1
 X2                  0         1
 X3                  0         1
+X5                  0         1
 X6                  0         1
 X7                  0         1

@@ -1,13 +1,13 @@
-Input File: reformated-data/hibachi-res_LogisticRegression_BernoulliNB-s90764_0.400.txt
-Computation options used: -p 999 -r 761399127 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Input File: reformatted-data/train/hibachi-res_LogisticRegression_BernoulliNB-s90764_0.400.txt
+Computation options used: -p 999 -r 1344545934 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X3                 322.731    0.001
-X6                 314.06     0.001
-X8                   4.055    0.627
+X3                 163.442    0.001
+X6                 159.744    0.001
+X8                   4.136    0.577
+X7                   3.325    0.712
 X0                   0        1
 X1                   0        1
 X2                   0        1
 X4                   0        1
 X5                   0        1
-X7                   0        1
 X9                   0        1
