@@ -15,10 +15,10 @@ Each subject risk score = chi_sq * (their value (HLO) at snp1_snp2)
 
 ```{r}
 rm(list = ls())
-row_1d <- 8
+row_1d <- 7
 p_threshold <- 1
 
-filenames <- list.files(here('mb-mdr', 'reformatted-data'), 
+filenames <- list.files(here('mb-mdr', 'reformatted-data', 'test'), 
                         pattern = '*.txt', full.names = F)
 
 sub_name <- function(filetype, my_file){
@@ -30,21 +30,27 @@ for (filename in filenames){
   out_file <- sub_name('output_1D', filename)
   risk_file <- sub_name('risk_1D', filename)
   
-  dat <- here('mb-mdr', 'reformatted-data', filename) %>% 
+  # read in test data
+  dat <- here('mb-mdr', 'reformatted-data', 'test', filename) %>% 
     fread() %>% 
     data.frame()
+  snp_dat <- select(dat, - Class)
+
+  # rm(raw_model)  
+  # read in models
   raw_model <- here('mb-mdr', 'results', mod_file) %>%
-    fread(fill = T, header = F) %>%
-    data.frame()
+    read.table(fill = T, stringsAsFactors = F)
+    # fread(fill = T, header = F) %>%
+    # data.frame()
+  
+  raw_model %>% head()
   chisq_df <- here('mb-mdr', 'results', out_file) %>%
     fread(header = F, skip = 3, 
           col.names = c('ma1', 'chi_sq', 'p_val'))
-  
-  snp_dat <- select(dat, - Class)
-  nrow_model <- floor(nrow(raw_model)/row_1d)
-  mdr_model <- list()
+  nrow_model <- floor((nrow(raw_model) + 1)/row_1d)
   
   # parse data
+  mdr_model <- list()
   for (i in seq(nrow_model)){
     idx <- row_1d * (i-1) + 1
     ma_names <- raw_model[idx, 1]
