@@ -1,6 +1,6 @@
 #!/bin/bash
 
-FILES=$(ls reformated-data/hibachi*)
+FILES=$(ls reformatted-data/train/hibachi*)
 for fname in $FILES; do
   echo "Processing $fname file..."
   # run mbmdr on each file
@@ -14,6 +14,6 @@ for fname in $FILES; do
   done
 done
 
-mv -f reformatted-data/*_1D.txt results/
-mv -f reformatted-data/*_2D.txt results/
-mv -f reformatted-data/*_3D.txt results/
+mv -f reformatted-data/train/*_1D.txt results/
+mv -f reformatted-data/train/*_2D.txt results/
+mv -f reformatted-data/train/*_3D.txt results/
