@@ -12,6 +12,7 @@ library(purrr)
 library(ggplot2)
 library(tidyr)
 library(here)
+library(tibble)
 ```
 
 3D results:
@@ -47,7 +48,7 @@ for (filename in filenames){
     mutate(ma_names = paste(ma1, ma2, ma3, sep = '_'))
   
   snp_dat <- select(dat, - Class)
-  nrow_model <- floor((nrow(raw_model) + 1)/row_2d)
+  nrow_model <- floor((nrow(raw_model) + 1)/row_3d)
   mdr_model <- list()
   
   # parse data

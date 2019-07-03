@@ -36,7 +36,6 @@ for (filename in filenames){
     data.frame()
   snp_dat <- select(dat, - Class)
 
-  # rm(raw_model)  
   # read in models
   raw_model <- here('mb-mdr', 'results', mod_file) %>%
     read.table(fill = T, stringsAsFactors = F)
