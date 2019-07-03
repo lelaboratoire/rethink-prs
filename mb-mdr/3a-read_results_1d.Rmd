@@ -43,11 +43,10 @@ for (filename in filenames){
     # fread(fill = T, header = F) %>%
     # data.frame()
   
-  raw_model %>% head()
   chisq_df <- here('mb-mdr', 'results', out_file) %>%
     fread(header = F, skip = 3, 
           col.names = c('ma1', 'chi_sq', 'p_val'))
-  nrow_model <- floor((nrow(raw_model) + 1)/row_1d)
+  nrow_model <- nrow(chisq_df)
   
   # parse data
   mdr_model <- list()

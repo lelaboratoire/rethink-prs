@@ -17,7 +17,7 @@ for (filename in filenames){
     dplyr::select(Class, paste0('X', 0:9)) 
   nsamp <- nrow(mydat)
   
-  train_idx <- sample(seq(nsamp), floor(nsamp/2), replace = F)
+  train_idx <- sample(seq(nsamp), floor(nsamp*0.8), replace = F)
   train_dat <- mydat[train_idx, ]
   test_dat <- mydat[-train_idx, ]
   

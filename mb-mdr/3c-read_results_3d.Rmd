@@ -35,7 +35,7 @@ for (filename in filenames){
   risk_file <- sub_name('risk_3D', filename)
   
   # shortfile <- shortfiles[1900]
-  dat <- here('mb-mdr', 'reformatted-data', filename) %>% 
+  dat <- here('mb-mdr', 'reformatted-data', 'test', filename) %>% 
     fread() %>% 
     data.frame()
   raw_model <- here('mb-mdr', 'results', mod_file) %>%
