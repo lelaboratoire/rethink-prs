@@ -1,7 +1,6 @@
 Input File: reformatted-data/train/hibachi-res_XGBClassifier_LogisticRegression-s99437_0.601.txt
-Computation options used: -p 999 -r 1366815209 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1480144810 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X8                 3.531      0.786
 X0                 0          1
 X1                 0          1
 X2                 0          1
@@ -10,4 +9,5 @@ X4                 0          1
 X5                 0          1
 X6                 0          1
 X7                 0          1
+X8                 0          1
 X9                 0          1

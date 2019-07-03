@@ -1,13 +1,13 @@
 Input File: reformatted-data/train/hibachi-res_GaussianNB_MLPClassifier-s51670_0.132.txt
-Computation options used: -p 999 -r 1330209563 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1440480290 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X0                 29.059     0.001
-X6                 15.812     0.003
-X7                  4.318     0.489
-X2                  2.799     0.809
+X0                 37.816     0.001
+X6                 23.942     0.001
+X7                 20.208     0.001
+X9                  4.883     0.385
 X1                  0         1
+X2                  0         1
 X3                  0         1
 X4                  0         1
 X5                  0         1
 X8                  0         1
-X9                  0         1

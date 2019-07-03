@@ -1,13 +1,13 @@
 Input File: reformatted-data/train/hibachi-res_KNeighborsClassifier_XGBClassifier-s60797_0.171.txt
-Computation options used: -p 999 -r 1343890461 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1455320871 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X8                 7.048      0.211
-X5                 5.594      0.338
+X5                 6.612      0.236
+X8                 3.190      0.801
+X6                 2.846      0.855
 X0                 0          1
 X1                 0          1
 X2                 0          1
 X3                 0          1
 X4                 0          1
-X6                 0          1
 X7                 0          1
 X9                 0          1

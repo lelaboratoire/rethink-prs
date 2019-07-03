@@ -1,8 +1,7 @@
 Input File: reformatted-data/train/hibachi-res_GaussianNB_KNeighborsClassifier-s68646_0.190.txt
-Computation options used: -p 999 -r 1328865003 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1439018081 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X1                 446.958    0.001
-X9                   3.569    0.738
+X1                 709.374    0.001
 X0                   0        1
 X2                   0        1
 X3                   0        1
@@ -11,3 +10,4 @@ X5                   0        1
 X6                   0        1
 X7                   0        1
 X8                   0        1
+X9                   0        1

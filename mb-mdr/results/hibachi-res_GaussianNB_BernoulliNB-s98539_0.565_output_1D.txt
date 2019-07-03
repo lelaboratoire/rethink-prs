@@ -1,11 +1,11 @@
 Input File: reformatted-data/train/hibachi-res_GaussianNB_BernoulliNB-s98539_0.565.txt
-Computation options used: -p 999 -r 1326596058 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1436530645 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X5                 177.19     0.001
-X8                 153.696    0.001
-X3                   7.522    0.146
-X0                   6.363    0.196
-X1                   0        1
+X5                 253.635    0.001
+X8                 251.93     0.001
+X3                  10.226    0.03
+X1                   4.409    0.483
+X0                   0        1
 X2                   0        1
 X4                   0        1
 X6                   0        1

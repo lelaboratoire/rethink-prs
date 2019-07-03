@@ -1,8 +1,8 @@
 Input File: reformatted-data/train/hibachi-res_KNeighborsClassifier_BernoulliNB-s76193_0.563.txt
-Computation options used: -p 999 -r 1338545835 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1449505649 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X4                 156.696    0.001
-X2                 141.133    0.001
+X2                 237.277    0.001
+X4                 232.258    0.001
 X0                   0        1
 X1                   0        1
 X3                   0        1

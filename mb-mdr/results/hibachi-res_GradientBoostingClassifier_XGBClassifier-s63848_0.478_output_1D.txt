@@ -1,8 +1,8 @@
 Input File: reformatted-data/train/hibachi-res_GradientBoostingClassifier_XGBClassifier-s63848_0.478.txt
-Computation options used: -p 999 -r 1337755906 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1448631685 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X4                 5.017      0.501
-X9                 3.193      0.832
+X4                 7.672      0.147
+X9                 4.584      0.517
 X0                 0          1
 X1                 0          1
 X2                 0          1

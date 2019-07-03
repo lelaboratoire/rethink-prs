@@ -1,10 +1,10 @@
 Input File: reformatted-data/train/hibachi-res_ExtraTreesClassifier_BernoulliNB-s87065_0.593.txt
-Computation options used: -p 999 -r 1320545538 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1429992722 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X9                 102.832    0.001
-X5                  83.272    0.001
+X9                 134.553    0.001
+X5                 130        0.001
+X1                   4.040    0.565
 X0                   0        1
-X1                   0        1
 X2                   0        1
 X3                   0        1
 X4                   0        1

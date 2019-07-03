@@ -1,12 +1,12 @@
 Input File: reformatted-data/train/hibachi-res_GradientBoostingClassifier_GaussianNB-s66354_0.579.txt
-Computation options used: -p 999 -r 1334394506 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1445001373 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X5                 4.575      0.554
-X0                 2.977      0.857
+X0                 0          1
 X1                 0          1
 X2                 0          1
 X3                 0          1
 X4                 0          1
+X5                 0          1
 X6                 0          1
 X7                 0          1
 X8                 0          1

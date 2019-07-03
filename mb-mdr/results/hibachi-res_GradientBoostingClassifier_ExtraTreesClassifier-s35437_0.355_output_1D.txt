@@ -1,13 +1,13 @@
 Input File: reformatted-data/train/hibachi-res_GradientBoostingClassifier_ExtraTreesClassifier-s35437_0.355.txt
-Computation options used: -p 999 -r 1333722226 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1444261865 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X9                 4.929      0.508
-X5                 3.652      0.742
+X5                 4.476      0.588
+X2                 3.669      0.724
+X1                 3.037      0.818
 X0                 0          1
-X1                 0          1
-X2                 0          1
 X3                 0          1
 X4                 0          1
 X6                 0          1
 X7                 0          1
 X8                 0          1
+X9                 0          1

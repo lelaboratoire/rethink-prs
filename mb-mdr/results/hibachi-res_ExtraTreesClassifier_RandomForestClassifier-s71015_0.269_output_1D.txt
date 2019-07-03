@@ -1,11 +1,11 @@
 Input File: reformatted-data/train/hibachi-res_ExtraTreesClassifier_RandomForestClassifier-s71015_0.269.txt
-Computation options used: -p 999 -r 1325117042 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1434933980 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X3                 4.940      0.503
-X6                 4.820      0.503
+X6                 4.37       0.646
 X0                 0          1
 X1                 0          1
 X2                 0          1
+X3                 0          1
 X4                 0          1
 X5                 0          1
 X7                 0          1

@@ -1,13 +1,13 @@
 Input File: reformatted-data/train/hibachi-res_XGBClassifier_MLPClassifier-s53348_0.349.txt
-Computation options used: -p 999 -r 1367084121 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+Computation options used: -p 999 -r 1480430529 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
 First Marker      Chi-square p-value
-X0                 10.434     0.022
-X3                  8.903     0.059
-X2                  6.824     0.174
-X7                  4.025     0.576
-X8                  3.723     0.576
-X5                  2.901     0.685
+X2                 12.77      0.013
+X7                  4.775     0.485
+X0                  0         1
 X1                  0         1
+X3                  0         1
 X4                  0         1
+X5                  0         1
 X6                  0         1
+X8                  0         1
 X9                  0         1
