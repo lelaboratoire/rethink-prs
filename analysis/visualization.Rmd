@@ -1,0 +1,218 @@
+---
+title: "Visualization"
+output: html_document
+---
+
+Set up:
+
+```{r}
+rm(list = ls())
+set.seed(1.618)
+
+source('analysis/utils.R') # run utility functions
+
+filenames <- list.files(
+  here('mb-mdr', 'reformatted-data', 'test'), 
+  pattern = '*.txt', full.names = F)
+plot_ex <- T # plot an example risk comparisons
+plot_i <- sample(seq(length(filenames)), 1)
+cbbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
+                "#0072B2", "#D55E00", "#CC79A7", "#c5679b", "#be548f")
+risk_methods <- c('ori', '1d', '2d', '3d', '12d')
+```
+
+Load results:
+
+```{r}
+load('results/compare_results.Rdata')
+```
+
+
+
+### Plot an example:
+
+#### auPRCs, auROCs...
+
+```{r}
+pri <- pr_list[[plot_i]]
+roci <- roc_list[[plot_i]]
+pr_text <- data.frame(
+  label = c(
+    paste0('Original risk \n', c(round(pri$pr_ori$auc.integral, 3))),
+    paste0('MM1\n ', round(pri$pr_1d$auc.integral, 3)),
+    paste0('MM2\n', round(pri$pr_2d$auc.integral, 3)),
+    paste0('MM3\n', round(pri$pr_3d$auc.integral, 3))
+    ),
+  x = c(0.35, 0.33, 0.7, 0.7),
+  y = c(0.32, 0.78, 0.6, 0.8),
+  type = c('Original', '1D', '2D', '3D')
+)
+
+prr_ori <- as.data.frame(pri$pr_ori$curve) %>%
+  magrittr::set_colnames(c('Recall', 'Precision', 'w'))
+prr_1d <- as.data.frame(pri$pr_1d$curve) %>%
+  magrittr::set_colnames(c('Recall', 'Precision', 'w'))
+prr_2d <- as.data.frame(pri$pr_2d$curve) %>%
+  magrittr::set_colnames(c('Recall', 'Precision', 'w'))
+prr_3d <- as.data.frame(pri$pr_3d$curve) %>%
+  magrittr::set_colnames(c('Recall', 'Precision', 'w'))
+
+pr <- paste0('pr_', risk_methods) %>%
+  map2(c('Original', '1D', '2D', '3D', '12D'), get_pr_curve) %>%
+  reduce(rbind) %>% 
+  magrittr::set_colnames(c('Recall', 'Precision', 'w', 'type')) %>%
+  ggplot(aes(Recall, Precision, color = type)) +
+  geom_path(size = 0.8) + theme_bw() + 
+  scale_color_manual(values = cbbPalette) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = seq(0, 1.1, 0.2), labels = scales::percent) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent) +
+  geom_text(pr_text, mapping = aes(x = x, y = y, label = label), size = 3) +
+  coord_fixed(ratio = 1) +
+  guides(color = FALSE)
+
+
+roc_text <- data.frame(
+  label = c(
+    paste0('Original\n', c(round(roci$roc_ori$auc, 3))),
+    paste0('MM1\n ', round(roci$roc_1d$auc, 3)),
+    paste0('MM2\n', round(roci$roc_2d$auc, 3)),
+    paste0('MM3\n', round(roci$roc_3d$auc, 3))
+    ),
+  x = c(0.73, 0.28 , 0.5, 0.8),
+  y = c(0.4, 0.6, 0.75, 0.82),
+  type = c('Original', '1D', '2D', '3D')
+)
+
+roc <- paste0('roc_', risk_methods) %>%
+  map2(c('Original', '1D', '2D', '3D', '12D'), get_roc_curve) %>%
+  reduce(rbind) %>% 
+  magrittr::set_colnames(c('FPR', 'TPR', 'w', 'type')) %>%
+  ggplot(aes(FPR, TPR, color = type)) +
+  geom_path(size = 0.8) + theme_bw() + 
+  scale_color_manual(values = cbbPalette) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = seq(0, 1.1, 0.2), labels = scales::percent) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent) +
+  geom_text(roc_text, mapping = aes(x = x, y = y, label = label), size = 3) +
+  coord_fixed(ratio = 1) +
+  guides(color = FALSE)
+
+(proc <- cowplot::plot_grid(roc, pr))
+ggsave(proc, filename = 'figs/ex1.pdf', height = 3.2, width = 7)
+
+```
+
+
+Look at all AUCs:
+
+```{r}
+auROCs <- paste0('roc_', risk_methods) %>%
+  magrittr::set_names(paste0('rocs_', risk_methods)) %>%
+  map_df(~ sapply(roc_list, get_auroc, risktype = .x)) %>%
+  gather('RiskType', 'auROC') %>%
+  mutate(RiskType = risktype_recode('rocs', RiskType)) %>%
+  ggplot(aes(x = RiskType, y = auROC, color = RiskType)) +
+  geom_boxplot(outlier.size = NULL) +
+  geom_jitter(height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
+  theme_bw() +
+  scale_color_manual(values = cbbPalette[]) +
+  theme(legend.position = 'None') +
+  labs(x = NULL)
+
+ggsave(auROCs, filename = 'figs/performances.pdf', height = 3.2, width = 3.5)
+```
+
+
+### auROC:
+2d
+```{r}
+df <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+           rocs_2d = sapply(roc_list, get_auroc, risktype = 'roc_2d')
+) %>%
+  mutate(dif = (rocs_2d - rocs_ori),
+         better = dif > 0) %>%
+  rownames_to_column('dataset') %>%
+  gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
+  mutate(RiskType = risktype_recode('rocs', RiskType))
+
+ori_vs_2d <- df %>%
+  ggplot(aes(x = fct_rev(RiskType), y = auROC)) +
+  geom_hline(yintercept = 0.5, linetype = 2, alpha) +
+  geom_line(aes(group = dataset, color = better), alpha  = 0.3) +
+  scale_x_discrete(expand = c(0.1, 0.1)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_point(aes(group = RiskType), height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
+  theme_bw() +
+  viridis::scale_color_viridis(discrete = T, end = 0.9) +
+  theme(legend.position = 'None') +
+  labs(x = NULL)
+ori_vs_2d
+
+dens_df <- density(df$dif) %$% 
+  data.frame(x = x, y = y) %>% 
+  mutate(area = x >= 0) 
+
+dens_plot <- dens_df %>%
+  ggplot(aes(x = x, ymin = 0, ymax = y, fill = area)) +
+  geom_ribbon(alpha = 0.6) +
+  geom_line(aes(y = y), alpha = 0.8) +
+  theme_bw() +
+  labs(x = bquote(Delta~'auROC (MM 2D - Original)'), y = NULL) +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(expand = c(0, 0)) +
+  expand_limits(y = max(dens_df$y)*1.05) +
+  theme(legend.position = 'None',
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  viridis::scale_fill_viridis(discrete = T, end = 0.9)
+
+cowplot::plot_grid(ori_vs_2d, dens_plot, align = 'h') %>%
+  ggsave(filename = 'figs/ori_vs_2d_auROC.pdf', height = 3, width = 5)
+```
+
+
+1d + 2d
+```{r}
+df <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+           rocs_12d = sapply(roc_list, get_auroc, risktype = 'roc_12d')
+) %>%
+  mutate(dif = (rocs_12d - rocs_ori),
+         better = dif > 0) %>%
+  rownames_to_column('dataset') %>%
+  gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
+  mutate(RiskType = risktype_recode('rocs', RiskType))
+
+ori_vs_12d <- df %>%
+  ggplot(aes(x = fct_rev(RiskType), y = auROC)) +
+  geom_hline(yintercept = 0.5, alpha = 0.5, linetype = 2) +
+  geom_line(aes(group = dataset, color = better), alpha  = 0.3) +
+  scale_x_discrete(expand = c(0.1, 0.1)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  geom_point(aes(group = RiskType), height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
+  theme_bw() +
+  viridis::scale_color_viridis(discrete = T, end = 0.9) +
+  theme(legend.position = 'None') +
+  labs(x = NULL)
+ori_vs_12d
+
+dens_df <- density(df$dif) %$% 
+  data.frame(x = x, y = y) %>% 
+  mutate(area = x >= 0) 
+
+dens_plot <- dens_df %>%
+  ggplot(aes(x = x, ymin = 0, ymax = y, fill = area)) +
+  geom_ribbon(alpha = 0.6) +
+  geom_line(aes(y = y), alpha = 0.8) +
+  theme_bw() +
+  labs(x = bquote(Delta~'auROC (MM12 - Original)'), y = NULL) +
+  scale_x_continuous(labels = scales::percent_format(accuracy = 1),
+                     breaks = seq(-0.4, 0.8, 0.4)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  expand_limits(y = max(dens_df$y)*1.05) +
+  theme(legend.position = 'None',
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank()) +
+  viridis::scale_fill_viridis(discrete = T, end = 0.9)
+
+cowplot::plot_grid(ori_vs_12d, dens_plot, align = 'h') %>%
+  ggsave(filename = 'figs/ori_vs_12d_auROC.pdf', height = 3, width = 5)
+```
