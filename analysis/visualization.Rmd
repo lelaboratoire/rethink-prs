@@ -6,10 +6,17 @@ output: html_document
 Set up:
 
 ```{r}
+library(data.table)
+library(tidyverse)
+library(here)
+```
+
+```{r}
 rm(list = ls())
 set.seed(1.618)
 
-source('analysis/utils.R') # run utility functions
+source(here('analysis', 'utils.R'))         # run utility functions
+source(here('analysis', 'viz_funcs.R'))     # run utility functions
 
 filenames <- list.files(
   here('mb-mdr', 'reformatted-data', 'test'), 
@@ -108,111 +115,58 @@ Look at all AUCs:
 auROCs <- paste0('roc_', risk_methods) %>%
   magrittr::set_names(paste0('rocs_', risk_methods)) %>%
   map_df(~ sapply(roc_list, get_auroc, risktype = .x)) %>%
+  select(- rocs_3d) %>%
   gather('RiskType', 'auROC') %>%
   mutate(RiskType = risktype_recode('rocs', RiskType)) %>%
-  ggplot(aes(x = RiskType, y = auROC, color = RiskType)) +
+  ggplot(aes(x = fct_reorder(RiskType, auROC), y = auROC, color = RiskType)) +
   geom_boxplot(outlier.size = NULL) +
   geom_jitter(height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
   theme_bw() +
-  scale_color_manual(values = cbbPalette[]) +
+  # scale_color_manual(values = cbbPalette[]) +
   theme(legend.position = 'None') +
-  labs(x = NULL)
+  labs(x = NULL) +
+  viridis::scale_color_viridis(discrete = T, end = 0.9, direction = -1)
 
 ggsave(auROCs, filename = 'figs/performances.pdf', height = 3.2, width = 3.5)
 ```
 
 
 ### auROC:
-2d
+1d
 ```{r}
 df <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
-           rocs_2d = sapply(roc_list, get_auroc, risktype = 'roc_2d')
-) %>%
-  mutate(dif = (rocs_2d - rocs_ori),
-         better = dif > 0) %>%
+                 rocs_1d = sapply(roc_list, get_auroc, risktype = 'roc_1d')) %>%
+  mutate(dif = (rocs_1d - rocs_ori), better = dif > 0) %>%
+  rownames_to_column('dataset') %>%
+  gather('RiskType', 'auROC', rocs_ori, rocs_1d) %>%
+  mutate(RiskType = risktype_recode('rocs', RiskType))
+
+plot_performances(df, method = 'MM1D', metric = 'auROC')
+```
+
+2d
+```{r}
+df_2d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+           rocs_2d = sapply(roc_list, get_auroc, risktype = 'roc_2d')) %>%
+  mutate(dif = (rocs_2d - rocs_ori), better = dif > 0) %>%
   rownames_to_column('dataset') %>%
   gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
   mutate(RiskType = risktype_recode('rocs', RiskType))
 
-ori_vs_2d <- df %>%
-  ggplot(aes(x = fct_rev(RiskType), y = auROC)) +
-  geom_hline(yintercept = 0.5, linetype = 2, alpha) +
-  geom_line(aes(group = dataset, color = better), alpha  = 0.3) +
-  scale_x_discrete(expand = c(0.1, 0.1)) +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  geom_point(aes(group = RiskType), height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
-  theme_bw() +
-  viridis::scale_color_viridis(discrete = T, end = 0.9) +
-  theme(legend.position = 'None') +
-  labs(x = NULL)
-ori_vs_2d
+plot_performances(df_2d, method = 'MM2D', metric = 'auROC')
 
-dens_df <- density(df$dif) %$% 
-  data.frame(x = x, y = y) %>% 
-  mutate(area = x >= 0) 
-
-dens_plot <- dens_df %>%
-  ggplot(aes(x = x, ymin = 0, ymax = y, fill = area)) +
-  geom_ribbon(alpha = 0.6) +
-  geom_line(aes(y = y), alpha = 0.8) +
-  theme_bw() +
-  labs(x = bquote(Delta~'auROC (MM 2D - Original)'), y = NULL) +
-  scale_x_continuous(labels = scales::percent) +
-  scale_y_continuous(expand = c(0, 0)) +
-  expand_limits(y = max(dens_df$y)*1.05) +
-  theme(legend.position = 'None',
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  viridis::scale_fill_viridis(discrete = T, end = 0.9)
-
-cowplot::plot_grid(ori_vs_2d, dens_plot, align = 'h') %>%
-  ggsave(filename = 'figs/ori_vs_2d_auROC.pdf', height = 3, width = 5)
 ```
 
 
 1d + 2d
 ```{r}
-df <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
-           rocs_12d = sapply(roc_list, get_auroc, risktype = 'roc_12d')
-) %>%
-  mutate(dif = (rocs_12d - rocs_ori),
-         better = dif > 0) %>%
+df_12d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+           rocs_12d = sapply(roc_list, get_auroc, risktype = 'roc_12d')) %>%
+  mutate(dif = (rocs_12d - rocs_ori), better = dif > 0) %>%
   rownames_to_column('dataset') %>%
   gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
   mutate(RiskType = risktype_recode('rocs', RiskType))
 
-ori_vs_12d <- df %>%
-  ggplot(aes(x = fct_rev(RiskType), y = auROC)) +
-  geom_hline(yintercept = 0.5, alpha = 0.5, linetype = 2) +
-  geom_line(aes(group = dataset, color = better), alpha  = 0.3) +
-  scale_x_discrete(expand = c(0.1, 0.1)) +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  geom_point(aes(group = RiskType), height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
-  theme_bw() +
-  viridis::scale_color_viridis(discrete = T, end = 0.9) +
-  theme(legend.position = 'None') +
-  labs(x = NULL)
-ori_vs_12d
+plot_performances(df_12d, method = 'MM12D', metric = 'auROC')
 
-dens_df <- density(df$dif) %$% 
-  data.frame(x = x, y = y) %>% 
-  mutate(area = x >= 0) 
-
-dens_plot <- dens_df %>%
-  ggplot(aes(x = x, ymin = 0, ymax = y, fill = area)) +
-  geom_ribbon(alpha = 0.6) +
-  geom_line(aes(y = y), alpha = 0.8) +
-  theme_bw() +
-  labs(x = bquote(Delta~'auROC (MM12 - Original)'), y = NULL) +
-  scale_x_continuous(labels = scales::percent_format(accuracy = 1),
-                     breaks = seq(-0.4, 0.8, 0.4)) +
-  scale_y_continuous(expand = c(0, 0)) +
-  expand_limits(y = max(dens_df$y)*1.05) +
-  theme(legend.position = 'None',
-        axis.ticks.y = element_blank(),
-        axis.text.y = element_blank()) +
-  viridis::scale_fill_viridis(discrete = T, end = 0.9)
-
-cowplot::plot_grid(ori_vs_12d, dens_plot, align = 'h') %>%
-  ggsave(filename = 'figs/ori_vs_12d_auROC.pdf', height = 3, width = 5)
 ```
