@@ -45,14 +45,14 @@ pri <- pr_list[[plot_i]]
 roci <- roc_list[[plot_i]]
 pr_text <- data.frame(
   label = c(
-    paste0('Original risk \n', c(round(pri$pr_ori$auc.integral, 3))),
+    paste0('Standard risk \n', c(round(pri$pr_ori$auc.integral, 3))),
     paste0('MM1\n ', round(pri$pr_1d$auc.integral, 3)),
     paste0('MM2\n', round(pri$pr_2d$auc.integral, 3)),
     paste0('MM3\n', round(pri$pr_3d$auc.integral, 3))
     ),
   x = c(0.35, 0.33, 0.7, 0.7),
   y = c(0.32, 0.78, 0.6, 0.8),
-  type = c('Original', '1D', '2D', '3D')
+  type = c('Standard', '1D', '2D', '3D')
 )
 
 prr_ori <- as.data.frame(pri$pr_ori$curve) %>%
@@ -65,7 +65,7 @@ prr_3d <- as.data.frame(pri$pr_3d$curve) %>%
   magrittr::set_colnames(c('Recall', 'Precision', 'w'))
 
 pr <- paste0('pr_', risk_methods) %>%
-  map2(c('Original', '1D', '2D', '3D', '12D'), get_pr_curve) %>%
+  map2(c('Standard', '1D', '2D', '3D', '12D'), get_pr_curve) %>%
   reduce(rbind) %>% 
   magrittr::set_colnames(c('Recall', 'Precision', 'w', 'type')) %>%
   ggplot(aes(Recall, Precision, color = type)) +
@@ -80,18 +80,18 @@ pr <- paste0('pr_', risk_methods) %>%
 
 roc_text <- data.frame(
   label = c(
-    paste0('Original\n', c(round(roci$roc_ori$auc, 3))),
+    paste0('Standard\n', c(round(roci$roc_ori$auc, 3))),
     paste0('MM1\n ', round(roci$roc_1d$auc, 3)),
     paste0('MM2\n', round(roci$roc_2d$auc, 3)),
     paste0('MM3\n', round(roci$roc_3d$auc, 3))
     ),
   x = c(0.73, 0.28 , 0.5, 0.8),
   y = c(0.4, 0.6, 0.75, 0.82),
-  type = c('Original', '1D', '2D', '3D')
+  type = c('Standard', '1D', '2D', '3D')
 )
 
 roc <- paste0('roc_', risk_methods) %>%
-  map2(c('Original', '1D', '2D', '3D', '12D'), get_roc_curve) %>%
+  map2(c('Standard', '1D', '2D', '3D', '12D'), get_roc_curve) %>%
   reduce(rbind) %>% 
   magrittr::set_colnames(c('FPR', 'TPR', 'w', 'type')) %>%
   ggplot(aes(FPR, TPR, color = type)) +

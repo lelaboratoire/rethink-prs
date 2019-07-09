@@ -16,7 +16,7 @@ my_t_test <- function(var){
 
 risktype_recode <- function(prefix = 'prs', x){
   fct_recode(x, 
-             Original = paste0(prefix, '_ori'),
+             Standard = paste0(prefix, '_ori'),
              `MM1` = paste0(prefix, '_1d'), 
              `MM2` = paste0(prefix, '_2d'), 
              `MM3` = paste0(prefix, '_3d'),
@@ -25,7 +25,7 @@ risktype_recode <- function(prefix = 'prs', x){
 
 # risktype_recode_roc <- function(x){
 #   fct_recode(x, 
-#              Original = 'rocs_ori',
+#              Standard = 'rocs_ori',
 #              `MM1` = 'rocs_1d', 
 #              `MM2` = 'rocs_2d',
 #              `MM3` = 'rocs_3d',
