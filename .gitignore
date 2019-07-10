@@ -4,6 +4,7 @@
 .Ruserdata
 .DS_Store
 rethink-prs.Rproj
+analysis/.ipynb_checkpoints/
 
 ## Data
 simulated-data/
