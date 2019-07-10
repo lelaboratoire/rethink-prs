@@ -35,13 +35,14 @@ plot_performances <- function(df, method = 'MM1D', metric = 'auROC'){
   
 }
 
-performances_info_gain <- function(method1, method2, xdf = info_gain, 
-                                   xlab = 'Total 2-way information gain'){
-  left_join(xdf, all_rocs, by = 'dataset') %>%
-    mutate(dif = !!sym(method1) - !!sym(method2)) %>%
-    ggplot(aes(x = value, y = dif)) +
-    geom_point(alpha = 0.3) + geom_smooth(color = 'grey30') +
-    theme_bw() +
-    labs(x = xlab, 
-         y = bquote(Delta~'auROC ('~.(method1)~'-'~.(method2)~')'))
-}
+# performances_info_gain <- function(method1, method2, xdf = info_gain, 
+#                                    xlab = 'Total 2-way information gain'){
+#   left_join(xdf, all_rocs, by = 'dataset') %>%
+#     mutate(dif = !!sym(method1) - !!sym(method2)) %>%
+#     ggplot(aes(x = value, y = dif)) +
+#     geom_point(alpha = 0.3, stroke = 0) +
+#     geom_smooth(color = 'grey30') +
+#     theme_bw() +
+#     labs(x = xlab, 
+#          y = bquote(Delta~'auROC ('~.(method1)~'-'~.(method2)~')'))
+# }

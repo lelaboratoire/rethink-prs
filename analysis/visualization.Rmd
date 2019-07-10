@@ -134,14 +134,14 @@ ggsave(auROCs, filename = 'figs/performances.pdf', height = 3.2, width = 3.5)
 ### auROC:
 1d
 ```{r}
-df <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+df_1d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
                  rocs_1d = sapply(roc_list, get_auroc, risktype = 'roc_1d')) %>%
   mutate(dif = (rocs_1d - rocs_ori), better = dif > 0) %>%
   rownames_to_column('dataset') %>%
   gather('RiskType', 'auROC', rocs_ori, rocs_1d) %>%
   mutate(RiskType = risktype_recode('rocs', RiskType))
 
-plot_performances(df, method = 'MM1D', metric = 'auROC')
+plot_performances(df_1d, method = 'MM1D', metric = 'auROC')
 ```
 
 2d
@@ -170,3 +170,58 @@ df_12d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'
 plot_performances(df_12d, method = 'MM12D', metric = 'auROC')
 
 ```
+
+
+Does improvement in the performance relate to how much interaction there is in a dataset?
+```{r}
+info_gain <- read_info('information_gain.csv', '2-way information gain')
+mutual_info_1d <- read_info('mutual_infomation_1d.csv', '1-way mutual information')
+
+all_rocs <- data.frame(
+  PRS = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+  MRS1 = sapply(roc_list, get_auroc, risktype = 'roc_1d'),
+  MRS2 = sapply(roc_list, get_auroc, risktype = 'roc_2d'),
+  MRS = sapply(roc_list, get_auroc, risktype = 'roc_12d')) %>%
+  mutate(`MRS1 - PRS` = MRS1 - PRS,
+         `MRS2 - MRS1` = MRS2 - MRS1,
+         `MRS - PRS` = MRS - PRS) %>%
+  rownames_to_column('dataset') %>%
+  left_join(info_gain, by = 'dataset') %>%
+  left_join(mutual_info_1d, by = c('dataset', 'filenames')) 
+
+improvement_plot <- all_rocs %>%
+  gather('Methods', 'Difference', contains(' - ')) %>%
+  gather('InformationType', 'value', contains('way')) %>%
+  ggplot(aes(x = value, y = Difference)) +
+  facet_grid(rows = vars(fct_inorder(Methods)), cols = vars(InformationType), scales = 'free') +
+  geom_point(alpha = 0.3, stroke = 0) +
+  geom_smooth(color = 'grey40') +
+    labs(x = 'Value', y = bquote(Delta~'auROC')) +
+  theme_bw()
+
+improvement_plot %>%
+  ggsave(filename = 'figs/improvements.pdf', height = 4.5, width = 4)
+```
+
+
+```{r}
+# performances_info_gain('MRS', 'PRS') %>% 
+#   ggsave(filename = 'figs/mrs-prs-2d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS2', 'MRS1') %>% 
+#   ggsave(filename = 'figs/mrs2-mrs1-2d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS1', 'PRS') %>% 
+#   ggsave(filename = 'figs/mrs1-prs-2d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS2', 'MRS1', mutual_info_1d, 'Total (1-way) mutual information') %>%
+#   ggsave(filename = 'figs/mrs2-mrs1-1d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS1', 'PRS', mutual_info_1d, 'Total (1-way) mutual information') %>%
+#   ggsave(filename = 'figs/mrs1-prs-1d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS', 'PRS', mutual_info_1d, 'Total (1-way) mutual information') %>% 
+#   ggsave(filename = 'figs/mrs-prs-1d.pdf', height = 3, width = 4)
+```
+
+

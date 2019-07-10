@@ -59,11 +59,11 @@ get_pr_curve <- function(var, varname){
   df
 }
 
-read_info <- function(filename){
+read_info <- function(filename, col_val = 'value'){
   # read in information gain files
   read_csv(
     here('results', filename), 
-    col_names = c('filenames', 'value')) %>%
+    col_names = c('filenames', col_val)) %>%
     left_join(rownames_to_column(tibble(filenames), 'dataset'), by = 'filenames') 
 }
 
