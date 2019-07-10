@@ -23,15 +23,6 @@ risktype_recode <- function(prefix = 'prs', x){
              `MM12` = paste0(prefix, '_12d'))
 }
 
-# risktype_recode_roc <- function(x){
-#   fct_recode(x, 
-#              Standard = 'rocs_ori',
-#              `MM1` = 'rocs_1d', 
-#              `MM2` = 'rocs_2d',
-#              `MM3` = 'rocs_3d',
-#              `MM3` = 'rocs_3d')
-# }
-
 roc_func <- function(risk_type){
   PRROC::roc.curve(scores.class0 = all_risks[, risk_type],
                    weights.class0 = all_risks$Class,
@@ -67,3 +58,12 @@ get_pr_curve <- function(var, varname){
   df$type <- varname
   df
 }
+
+read_info <- function(filename){
+  # read in information gain files
+  read_csv(
+    here('results', filename), 
+    col_names = c('filenames', 'value')) %>%
+    left_join(rownames_to_column(tibble(filenames), 'dataset'), by = 'filenames') 
+}
+
