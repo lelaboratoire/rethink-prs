@@ -16,11 +16,11 @@ my_t_test <- function(var){
 
 risktype_recode <- function(prefix = 'prs', x){
   fct_recode(x, 
-             Standard = paste0(prefix, '_ori'),
-             `MM1` = paste0(prefix, '_1d'), 
-             `MM2` = paste0(prefix, '_2d'), 
-             `MM3` = paste0(prefix, '_3d'),
-             `MM12` = paste0(prefix, '_12d'))
+             PRS = paste0(prefix, '_ori'),
+             `MRS1` = paste0(prefix, '_1d'), 
+             `MRS2` = paste0(prefix, '_2d'), 
+             `MRS3` = paste0(prefix, '_3d'),
+             `MRS` = paste0(prefix, '_12d'))
 }
 
 roc_func <- function(risk_type){

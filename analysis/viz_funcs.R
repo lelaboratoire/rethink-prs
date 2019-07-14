@@ -1,4 +1,4 @@
-plot_performances <- function(df, method = 'MM1D', metric = 'auROC'){
+plot_performances <- function(df, method = 'MRS1', metric = 'auROC'){
   ori_vs_mm <- df %>%
     ggplot(aes(x = fct_rev(RiskType), y = !!sym(metric))) +
     geom_hline(yintercept = 0.5, linetype = 2, alpha) +
@@ -20,7 +20,7 @@ plot_performances <- function(df, method = 'MM1D', metric = 'auROC'){
     geom_ribbon(alpha = 0.6) +
     geom_line(aes(y = y), alpha = 0.8) +
     theme_bw() +
-    labs(x = bquote(Delta~.(metric)~'('~.(method)~'- Standard)'), y = NULL) +
+    labs(x = bquote(Delta~.(metric)~'('~.(method)~'- PRS)'), y = NULL) +
     scale_x_continuous(labels = scales::percent_format(accuracy = 1)) +
     scale_y_continuous(expand = c(0, 0)) +
     expand_limits(y = max(dens_df$y)*1.05) +
@@ -31,6 +31,9 @@ plot_performances <- function(df, method = 'MM1D', metric = 'auROC'){
   
   cowplot::plot_grid(ori_vs_mm, dens_plot, align = 'h') %>%
     ggsave(filename = paste('figs/ori_vs', method, metric, '.pdf', sep = '_'), 
+           height = 3, width = 5)
+  cowplot::plot_grid(ori_vs_mm, dens_plot, align = 'h') %>%
+    ggsave(filename = paste('figs/ori_vs', method, metric, '.svg', sep = '_'), 
            height = 3, width = 5)
   
 }
