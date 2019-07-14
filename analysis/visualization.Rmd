@@ -45,14 +45,14 @@ pri <- pr_list[[plot_i]]
 roci <- roc_list[[plot_i]]
 pr_text <- data.frame(
   label = c(
-    paste0('Standard risk \n', c(round(pri$pr_ori$auc.integral, 3))),
-    paste0('MM1\n ', round(pri$pr_1d$auc.integral, 3)),
-    paste0('MM2\n', round(pri$pr_2d$auc.integral, 3)),
-    paste0('MM3\n', round(pri$pr_3d$auc.integral, 3))
+    paste0('PRS\n', c(round(pri$pr_ori$auc.integral, 3))),
+    paste0('MRS1\n ', round(pri$pr_1d$auc.integral, 3)),
+    paste0('MRS2\n', round(pri$pr_2d$auc.integral, 3)),
+    paste0('MRS3\n', round(pri$pr_3d$auc.integral, 3))
     ),
   x = c(0.35, 0.33, 0.7, 0.7),
   y = c(0.32, 0.78, 0.6, 0.8),
-  type = c('Standard', '1D', '2D', '3D')
+  type = c('PRS', '1D', '2D', '3D')
 )
 
 prr_ori <- as.data.frame(pri$pr_ori$curve) %>%
@@ -65,7 +65,7 @@ prr_3d <- as.data.frame(pri$pr_3d$curve) %>%
   magrittr::set_colnames(c('Recall', 'Precision', 'w'))
 
 pr <- paste0('pr_', risk_methods) %>%
-  map2(c('Standard', '1D', '2D', '3D', '12D'), get_pr_curve) %>%
+  map2(c('PRS', '1D', '2D', '3D', '12D'), get_pr_curve) %>%
   reduce(rbind) %>% 
   magrittr::set_colnames(c('Recall', 'Precision', 'w', 'type')) %>%
   ggplot(aes(Recall, Precision, color = type)) +
@@ -80,18 +80,18 @@ pr <- paste0('pr_', risk_methods) %>%
 
 roc_text <- data.frame(
   label = c(
-    paste0('Standard\n', c(round(roci$roc_ori$auc, 3))),
-    paste0('MM1\n ', round(roci$roc_1d$auc, 3)),
-    paste0('MM2\n', round(roci$roc_2d$auc, 3)),
-    paste0('MM3\n', round(roci$roc_3d$auc, 3))
+    paste0('PRS\n', c(round(roci$roc_ori$auc, 3))),
+    paste0('MRS1\n ', round(roci$roc_1d$auc, 3)),
+    paste0('MRS2\n', round(roci$roc_2d$auc, 3)),
+    paste0('MRS3\n', round(roci$roc_3d$auc, 3))
     ),
   x = c(0.73, 0.28 , 0.5, 0.8),
   y = c(0.4, 0.6, 0.75, 0.82),
-  type = c('Standard', '1D', '2D', '3D')
+  type = c('PRS', '1D', '2D', '3D')
 )
 
 roc <- paste0('roc_', risk_methods) %>%
-  map2(c('Standard', '1D', '2D', '3D', '12D'), get_roc_curve) %>%
+  map2(c('PRS', '1D', '2D', '3D', '12D'), get_roc_curve) %>%
   reduce(rbind) %>% 
   magrittr::set_colnames(c('FPR', 'TPR', 'w', 'type')) %>%
   ggplot(aes(FPR, TPR, color = type)) +
@@ -110,6 +110,7 @@ roc <- paste0('roc_', risk_methods) %>%
 
 ```{r}
 ggsave(proc, filename = 'figs/ex1.pdf', height = 3.2, width = 7)
+ggsave(proc, filename = 'figs/ex1.svg', height = 3.2, width = 7)
 ```
 
 
@@ -132,6 +133,7 @@ auROCs <- paste0('roc_', risk_methods) %>%
   viridis::scale_color_viridis(discrete = T, end = 0.9, direction = -1)
 
 ggsave(auROCs, filename = 'figs/performances.pdf', height = 3.2, width = 3.5)
+ggsave(auROCs, filename = 'figs/performances.svg', height = 3.2, width = 3.5)
 ```
 
 
@@ -145,7 +147,7 @@ df_1d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori')
   gather('RiskType', 'auROC', rocs_ori, rocs_1d) %>%
   mutate(RiskType = risktype_recode('rocs', RiskType))
 
-plot_performances(df_1d, method = 'MM1D', metric = 'auROC')
+plot_performances(df_1d, method = 'MRS1', metric = 'auROC')
 ```
 
 2d
@@ -157,7 +159,7 @@ df_2d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori')
   gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
   mutate(RiskType = risktype_recode('rocs', RiskType))
 
-plot_performances(df_2d, method = 'MM2D', metric = 'auROC')
+plot_performances(df_2d, method = 'MRS2', metric = 'auROC')
 
 ```
 
@@ -171,7 +173,7 @@ df_12d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'
   gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
   mutate(RiskType = risktype_recode('rocs', RiskType))
 
-plot_performances(df_12d, method = 'MM12D', metric = 'auROC')
+plot_performances(df_12d, method = 'MRS', metric = 'auROC')
 
 ```
 
@@ -187,6 +189,7 @@ all_rocs <- data.frame(
   MRS2 = sapply(roc_list, get_auroc, risktype = 'roc_2d'),
   MRS = sapply(roc_list, get_auroc, risktype = 'roc_12d')) %>%
   mutate(`MRS1 - PRS` = MRS1 - PRS,
+         `MRS2 - PRS` = MRS2 - PRS,
          `MRS2 - MRS1` = MRS2 - MRS1,
          `MRS - PRS` = MRS - PRS) %>%
   rownames_to_column('dataset') %>%
@@ -205,7 +208,31 @@ improvement_plot <- all_rocs %>%
   theme_bw()
 
 improvement_plot %>%
-  ggsave(filename = here('figs', 'improvements_train.pdf'), height = 4.5, width = 4)
+  ggsave(filename = here('figs', 'improvements_train.pdf'), height = 6, width = 4)
+
+improvement_plot %>%
+  ggsave(filename = here('figs', 'improvements_train.svg'), height = 6, width = 4)
+```
+
+
+```{r}
+improvement_plot <- all_rocs %>%
+  dplyr::select(-`MRS2 - MRS1`) %>%
+  gather('Methods', 'Difference', contains(' - ')) %>%
+  gather('InformationType', 'value', contains('way')) %>%
+  ggplot(aes(x = value, y = Difference)) +
+  facet_grid(rows = vars(fct_inorder(Methods)), cols = vars(InformationType), scales = 'free') +
+  geom_point(alpha = 0.3, stroke = 0) +
+  geom_smooth(color = 'grey40') +
+    labs(x = NULL, y = bquote(Delta~'auROC')) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
+  theme_bw()
+
+improvement_plot %>%
+  ggsave(filename = here('figs', 'improvements_train_ms.pdf'), height = 4.5, width = 4)
+
+improvement_plot %>%
+  ggsave(filename = here('figs', 'improvements_train_ms.svg'), height = 4.5, width = 4)
 ```
 
 But information is currently computed on the training set only. What about testing?
@@ -239,6 +266,9 @@ improvement_plot <- all_rocs %>%
 
 ggsave(improvement_plot,
        filename = here('figs', 'improvements_test.pdf'), 
+       height = 4.5, width = 4)
+ggsave(improvement_plot,
+       filename = here('figs', 'improvements_test.svg'), 
        height = 4.5, width = 4)
 ```
 
