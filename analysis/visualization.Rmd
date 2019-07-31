@@ -26,12 +26,13 @@ plot_i <- sample(seq(length(filenames)), 1)
 cbbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
                 "#0072B2", "#D55E00", "#CC79A7", "#c5679b", "#be548f")
 risk_methods <- c('ori', '1d', '2d', '3d', '12d')
+pthres <- 1
 ```
 
 Load results:
 
 ```{r}
-load(here('results', 'compare_results.Rdata'))
+load(here('results', 'p1compare_results.Rdata'))
 ```
 
 
@@ -173,7 +174,7 @@ df_12d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'
   gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
   mutate(RiskType = risktype_recode('rocs', RiskType))
 
-plot_performances(df_12d, method = 'MRS', metric = 'auROC')
+plot_performances(df_12d, method = 'MRS', metric = 'auROC', pthres = pthres)
 
 ```
 
@@ -203,7 +204,7 @@ improvement_plot <- all_rocs %>%
   facet_grid(rows = vars(fct_inorder(Methods)), cols = vars(InformationType), scales = 'free') +
   geom_point(alpha = 0.3, stroke = 0) +
   geom_smooth(color = 'grey40') +
-    labs(x = NULL, y = bquote(Delta~'auROC')) +
+  labs(x = NULL, y = bquote(Delta~'auROC')) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
   theme_bw()
 
@@ -238,8 +239,8 @@ improvement_plot %>%
 But information is currently computed on the training set only. What about testing?
 
 ```{r}
-info_gain <- read_info_test('information_gain_test.csv', '2-way information gain')
-mutual_info_1d <- read_info_test('mutual_infomation_1d_test.csv', '1-way mutual information')
+info_gain <- read_info('information_gain_test.csv', '2-way information gain')
+mutual_info_1d <- read_info('mutual_infomation_1d_test.csv', '1-way mutual information')
 
 all_rocs <- data.frame(
   PRS = sapply(roc_list, get_auroc, risktype = 'roc_ori'),

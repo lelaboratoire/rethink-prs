@@ -16,6 +16,7 @@ Each subject risk score = chi_sq * (their value (HLO) at snp1_snp2)
 ```{r}
 rm(list = ls())
 row_2d <- 14
+p_threshold <- 0.05
 
 filenames <- list.files(here('mb-mdr', 'reformatted-data', 'test'), 
                         pattern = '*.txt', full.names = F)
@@ -66,15 +67,17 @@ for (filename in filenames){
   
   for (subj_idx in seq(nrow(snp_dat))){
     sum = 0
-    for (i in seq(nrow(chisq_df))){
-      ma_pair <- chisq_df$ma_names[i] # e.g. X1_X2
-      chi_sq <- chisq_df$chi_sq[i] # chi-squared values of that SNP comb
-      mas <- strsplit(ma_pair, '_') %>% unlist # SNPs names, e.g. c('X1', 'X2')
-      snp1_val <- snp_dat[subj_idx, mas[1]]
-      snp2_val <- snp_dat[subj_idx, mas[2]]
-      
-      hlo <- mdr_model[[ma_pair]]$HLO
-      sum <- sum + hlo[snp1_val + 1, snp2_val + 1]*chi_sq # check order here
+    for (j in seq(nrow(chisq_df))){
+      if (chisq_df$p_val[j] < p_threshold){
+        ma_pair <- chisq_df$ma_names[j] # e.g. X1_X2
+        chi_sq <- chisq_df$chi_sq[j] # chi-squared values of that SNP comb
+        mas <- strsplit(ma_pair, '_') %>% unlist # SNPs names, e.g. c('X1', 'X2')
+        snp1_val <- snp_dat[subj_idx, mas[1]]
+        snp2_val <- snp_dat[subj_idx, mas[2]]
+        
+        hlo <- mdr_model[[ma_pair]]$HLO
+        sum <- sum + hlo[snp1_val + 1, snp2_val + 1]*chi_sq # check order here
+      }
     }
     risk_2d[subj_idx] <- sum
   }
@@ -85,12 +88,12 @@ for (filename in filenames){
   #   ggplot(aes(x = Class, y = risk_score, fill = Class)) +
   #   geom_boxplot()
   
-  cor.test(result_df$Class, result_df$risk_2d)
+  # cor.test(result_df$Class, result_df$risk_2d)
   
   result_df %>% 
     rownames_to_column('Subj') %>%
     dplyr::select(Subj, Class, risk_2d) %>%
-    fwrite(here('mb-mdr', 'risks', risk_file))
+    fwrite(here('mb-mdr', 'risks', paste0('p', p_threshold), risk_file))
   
 }
 ```

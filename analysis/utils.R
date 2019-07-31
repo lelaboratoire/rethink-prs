@@ -4,8 +4,8 @@ sub_name <- function(filetype, my_file){
   gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
 }
 
-read_risks <- function(filetype, my_file){
-  fread(here('mb-mdr', 'risks', sub_name(filetype, filename)))
+read_risks <- function(pthres, filetype, my_file){
+  fread(here('mb-mdr', 'risks', pthres, sub_name(filetype, filename)))
 }
 
 my_t_test <- function(var){

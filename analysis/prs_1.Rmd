@@ -15,6 +15,7 @@ filenames <- list.files(here::here('mb-mdr', 'reformatted-data', 'train'),
                         pattern = '*.txt', full.names = F)
 alpha <- 1 # pvalue threshold, e.g. 1 = take all variants
 run_stir <- FALSE
+pthres <- 'p0.05'
 ```
 
 
@@ -55,7 +56,7 @@ for (file_i in filenames){
   cor.test(prs_i, dat_test$Class)
   data.frame(Class = dat_test$Class, risk_ori = prs_i) %>%
     rownames_to_column('Subj') %>%
-    data.table::fwrite(here::here('mb-mdr', 'risks', risk_file))
+    data.table::fwrite(here::here('mb-mdr', 'risks', pthres, risk_file))
 }
 ```
 

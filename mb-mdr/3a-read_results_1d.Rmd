@@ -16,7 +16,7 @@ Each subject risk score = chi_sq * (their value (HLO) at snp1_snp2)
 ```{r}
 rm(list = ls())
 row_1d <- 7
-p_threshold <- 1
+p_threshold <- 0.05
 
 filenames <- list.files(here('mb-mdr', 'reformatted-data', 'test'), 
                         pattern = '*.txt', full.names = F)
@@ -90,7 +90,7 @@ for (filename in filenames){
   result_df %>% 
     rownames_to_column('Subj') %>%
     dplyr::select(Subj, Class, risk_1d) %>%
-    fwrite(here('mb-mdr', 'risks', risk_file))
+    fwrite(here('mb-mdr', 'risks', paste0('p', p_threshold), risk_file))
   
 }
 ```
