@@ -1,8 +1,9 @@
 # Multilocus Risk Scores
 
 This repository contains detailed simulation and analysis code needed to reproduce the results in this study:
-** Expanding polygenic risk scores to include automatic genotype encodings and gene-gene interactions**
-Trang T. Le, Hoyt Gong, Patryk Orzechowski, Elisabetta Manduchi, Jason H. Moore
+
+**Expanding polygenic risk scores to include automatic genotype encodings and gene-gene interactions**.
+Trang T. Le, Hoyt Gong, Patryk Orzechowski, Elisabetta Manduchi, Jason H. Moore.
 In preparation.
 
 ## Simulated data
