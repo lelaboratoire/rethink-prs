@@ -39,3 +39,19 @@ Each of the settings was analyzed using 5-fold cross-validation and the best set
 The best settings out of 5 for each classifiers were compared and the settings that maximized the difference in the fitness were promoted.
 Each experiment in which one machine learning method was expected to outperform the other was repeated five times.
 The results of each pair of classifiers were later averaged.
+
+In order to generate each of 450 datasets, corresponding to pairwise comparisons between 10 ML methods, HIBACHI had to run for 50 iterations with 500 individuals.
+At each of 50 iterations, 2 ML methods were evaluated across 500 different potential solutions to the problem using 5 different sets of hyperparameters.
+This means that over 112M of evaluations of a ML method were made in order to make the further comparison objective.
+As the number of potential hyperparameters differed depending on the method (so as the number of values), the methods that had the largest space had better chances to outperform the others.
+The statistics showing how often a given ML method outperformed the other is presented in Figure {@fig:classcomp}.
+
+![The frequency of "up" ML method outperforming "down" method (ideally all the chart should be red)](images/class_comp.eps){#fig:classcomp width="70%"}
+
+In the majority of the scenarios, the ML method that was handicaped won against its competetitors in the vast majority of the scenarios.
+It may be noticed, however, that two ML methods performed visibly better than the others, namely GradientBoosting following by XGBoost.
+The methods, even run as "down" scenarios, still managed to obtain the higher accuracy in comparison to the handicapped "up" method.
+There are two potential explanations for it.
+First, those two ML methods are known for their stellar performance on different sets of problems and are considered one of the leading supervised ML methods.
+Secondly, the size of the grid of their hyperparameters was the broadest.
+This may suggest that random selection of the values of the parameters within the large grid allows the method to find more accurate solutions.
