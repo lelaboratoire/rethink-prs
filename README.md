@@ -46,7 +46,7 @@ This means that over 112M of evaluations of a ML method were made in order to ma
 As the number of potential hyperparameters differed depending on the method (so as the number of values), the methods that had the largest space had better chances to outperform the others.
 The statistics showing how often a given ML method outperformed the other is presented in Figure {@fig:classcomp}.
 
-![The frequency of "up" ML method outperforming "down" method (ideally all the chart should be red)](images/class_comp.eps){#fig:classcomp width="70%"}
+![The frequency of "up" ML method outperforming "down" method (ideally all the chart should be red)](figs/class_comp.eps){#fig:classcomp width="70%"}
 
 In the majority of the scenarios, the ML method that was handicaped won against its competetitors in the vast majority of the scenarios.
 It may be noticed, however, that two ML methods performed visibly better than the others, namely GradientBoosting following by XGBoost.
