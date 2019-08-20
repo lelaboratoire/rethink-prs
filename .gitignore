@@ -4,8 +4,12 @@
 .Ruserdata
 .DS_Store
 rethink-prs.Rproj
+<<<<<<< HEAD
 
 ## Data
 simulated-data/
 csv_data_300/
 hibachi-gwas-datasets/
+=======
+analysis/.ipynb_checkpoints/
+>>>>>>> d31672c995a8168068c77b1f7f11a652665adbb0

@@ -8,73 +8,88 @@ library(tidyverse)
 
 
 ```{r}
-data_dir <- 'simulated-data'
-filenames <- list.files(data_dir, pattern = '*.txt', full.names = T)
-
-alpha <- 1 # pvalue threshold
+# data_dir <- 'reformatted-data/train'
+# filenames <- list.files(here('mb-mdr', 'reformatted-data'), 
+#                         pattern = '*.txt', full.names = T)
+filenames <- list.files(here::here('mb-mdr', 'reformatted-data', 'train'), 
+                        pattern = '*.txt', full.names = F)
+alpha <- 1 # pvalue threshold, e.g. 1 = take all variants
+run_stir <- FALSE
+pthres <- 'p0.05'
 ```
 
-Try dataset 3:
+
+
 
 ```{r}
-i <- 2
-file_i <- filenames[i]
-dat_i <- data.table::fread(file_i)
-nvars <- ncol(dat_i) - 1
-snps <- colnames(dat_i)[1:nvars]
-coef_i <- matrix(NA, nrow = nvars, ncol = 2,
-                 dimnames = list(snps, c('beta_univar', 'pval')))
-for (snp in snps){
-  coef_i[snp, ] <- glm(expr(Class ~ !!sym(snp)), data = dat_i, family = 'binomial') %>%
-    summary() %>% 
-    with(coefficients) %>%
-    .[2, c('Estimate', 'Pr(>|z|)')]
+for (file_i in filenames){
+  dat_train <- here::here('mb-mdr', 'reformatted-data', 'train', file_i) %>% 
+    data.table::fread() %>% 
+    data.frame()
+  dat_test <- here::here('mb-mdr', 'reformatted-data', 'test', file_i) %>% 
+    data.table::fread() %>% 
+    data.frame()
+  
+  risk_file <- gsub('.txt', '_risk_ori.txt', file_i)
+  nvars <- ncol(dat_train) - 1
+  snps <- colnames(dat_train)[2:(nvars + 1)]
+  coef_i <- matrix(NA, nrow = nvars, ncol = 2,
+                   dimnames = list(snps, c('beta_univar', 'pval')))
+  for (snp in snps){
+    coef_i[snp, ] <- glm(expr(Class ~ !!sym(snp)), data = dat_train, family = 'binomial') %>%
+      summary() %>% 
+      with(coefficients) %>%
+      .[2, c('Estimate', 'Pr(>|z|)')]
+  }
+  
+  betas_i <- coef_i %>%
+    data.frame() %>%
+    rownames_to_column('att') %>%
+    mutate(padj =  p.adjust(pval, method = 'BH')) %>%
+    filter(padj < alpha)
+  
+  prs_i <- dat_test %>%
+    dplyr::select(betas_i$att) %>%
+    as.matrix() %*% 
+    as.matrix(betas_i$beta) 
+  
+  cor.test(prs_i, dat_test$Class)
+  data.frame(Class = dat_test$Class, risk_ori = prs_i) %>%
+    rownames_to_column('Subj') %>%
+    data.table::fwrite(here::here('mb-mdr', 'risks', pthres, risk_file))
 }
-
-betas_i <- coef_i %>%
-  data.frame() %>%
-  rownames_to_column('att') %>%
-  mutate(padj =  p.adjust(pval, method = 'BH')) %>%
-  filter(padj < alpha)
-
-prs_i <- dat_i %>%
-  dplyr::select(betas_i$att) %>%
-  as.matrix() %*% 
-  as.matrix(betas_i$beta) 
-
 ```
-
 
 Let's now run STIR:
 
 ```{r}
-library(npdr)
-
-stir.results <- npdr('Class', dat_i, regression.type="binomial", 
-         attr.diff.type = "allele-sharing", nbd.method = "multisurf", 
-         nbd.metric = "allele-sharing-manhattan", msurf.sd.frac = .5, 
-         padj.method = "bonferroni", verbose = T) 
-
-betas_stir_i <- stir.results %>%
-  filter(beta.Z.att > 0) %>%
-  merge(coef_i, by.x = 'att', by.y = 'row.names') %>%
-  mutate(betas_multiplied = beta.Z.att * beta_univar)
-
-prs_stir_i <- dat_i %>%
-  dplyr::select(betas_stir_i$att) %>%
-  as.matrix() %*% 
-  as.matrix(betas_stir_i$betas_multiplied) 
-
-data.frame(Class = as.factor(dat_i$Class), 
-           Standard_risk = prs_i,
-           STIR_risk = prs_stir_i) %>%
-  gather('Type', 'Risk', 2:3) %>%
-  ggplot(aes(x = Type, y = Risk, fill = Class)) +
-  geom_boxplot()
-
-
-cor.test(prs_i, dat_i$Class)
-cor.test(prs_stir_i, dat_i$Class)
+if (run_stir){
+  library(npdr)
+  
+  stir.results <- npdr('Class', dat_train, regression.type="binomial", 
+                       attr.diff.type = "allele-sharing", nbd.method = "multisurf", 
+                       nbd.metric = "allele-sharing-manhattan", msurf.sd.frac = .5, 
+                       padj.method = "bonferroni", verbose = T) 
+  
+  betas_stir_i <- stir.results %>%
+    filter(beta.Z.att > 0) %>%
+    merge(coef_i, by.x = 'att', by.y = 'row.names') %>%
+    mutate(beta.Z.att.scaled = scale(beta.Z.att, center = F, scale = T)) %>%
+    mutate(betas_multiplied = beta.Z.att.scaled * sign(beta_univar))
+  
+  prs_stir_i <- dat_train %>%
+    dplyr::select(betas_stir_i$att) %>%
+    as.matrix() %*% 
+    as.matrix(betas_stir_i$betas_multiplied) 
+  
+  data.frame(Class = as.factor(dat_train$Class), 
+             Standard_risk = prs_i,
+             STIR_risk = prs_stir_i) %>%
+    gather('Type', 'Risk', 2:3) %>%
+    ggplot(aes(x = Type, y = Risk, fill = Class)) +
+    geom_boxplot()
+  
+  cor.test(prs_stir_i, dat_train$Class)
+}
 ```
-
 

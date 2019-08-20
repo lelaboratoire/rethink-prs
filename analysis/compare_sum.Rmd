@@ -1,0 +1,62 @@
+---
+title: "Compare results"
+output: html_document
+---
+
+```{r}
+library(data.table)
+library(tidyverse)
+library(here)
+```
+
+```{r}
+rm(list = ls())
+set.seed(1.618)
+
+source('analysis/utils.R') # run utility functions
+
+filenames <- list.files(
+  here('mb-mdr', 'reformatted-data', 'test'), 
+  pattern = '*.txt', full.names = F)
+plot_ex <- T # plot an example risk comparisons
+plot_i <- sample(seq(length(filenames)), 1)
+cbbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
+                "#0072B2", "#D55E00", "#CC79A7", "#c5679b", "#be548f")
+```
+
+
+```{r}
+i <- 0
+pr_list <- vector('list', length = length(filenames))
+roc_list <- vector('list', length = length(filenames))
+risk_methods <- c('ori', '1d', '2d', '12d')
+pthres <- 'p0.05'
+
+for (filename in filenames){
+  i <- i + 1
+  risk_1d <- read_risks(pthres, 'risk_1D', filename) %>%
+    mutate(risk_1d = - risk_1d) # fix the sign flipped in mb-mdr v.4.4.1
+  risk_2d <- read_risks(pthres, 'risk_2D', filename)
+  # risk_3d <- read_risks(pthres, 'risk_3D', filename)
+  risk_ori <- read_risks(pthres, 'risk_ori', filename)
+  
+  # all_risks <- list(risk_ori, risk_1d, risk_2d, risk_3d) %>%
+  all_risks <- list(risk_ori, risk_1d, risk_2d) %>%
+    reduce(left_join, by = c('Subj', 'Class')) %>%
+    mutate(risk_12d = risk_1d + risk_2d)
+  
+  ctrls <- filter(all_risks, Class == 0)
+  cases <- filter(all_risks, Class == 1)
+  
+  pr_list[[i]] <- paste0('risk_', risk_methods) %>%
+    lapply(pr_func) %>%
+    magrittr::set_names(paste0('pr_', risk_methods))
+  
+  roc_list[[i]] <- paste0('risk_', risk_methods) %>%
+    lapply(roc_func) %>%
+    magrittr::set_names(paste0('roc_', risk_methods))
+}
+
+save(roc_list, pr_list, file = here('results', paste0(pthres, 'compare_results.Rdata')))
+```
+

@@ -1,0 +1,259 @@
+---
+title: "Compare results"
+output: html_document
+---
+
+```{r}
+library(data.table)
+library(tidyverse)
+library(here)
+```
+
+```{r}
+rm(list = ls())
+set.seed(1.618)
+filenames <- list.files(
+  here('mb-mdr', 'reformatted-data', 'test'), 
+  pattern = '*.txt', full.names = F)
+plot_ex <- T # plot an example risk comparisons
+plot_i <- sample(seq(length(filenames)), 1)
+cbbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
+                "#0072B2", "#D55E00", "#CC79A7", "#c5679b", "#be548f")
+```
+
+## Define some utility functions
+
+```{r}
+sub_name <- function(filetype, my_file){
+  gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
+}
+
+read_risks <- function(filetype, my_file){
+  fread(here('mb-mdr', 'risks', sub_name(filetype, filename)))
+}
+
+my_t_test <- function(var){
+   t.test(x = cases[, var], y = ctrls[, var], 'greater') %>%
+    broom::tidy() %>%
+    select(statistic, p.value)
+}
+
+roc_func <- function(risk_type){
+  PRROC::roc.curve(scores.class0 = all_risks[, risk_type],
+                   weights.class0 = all_risks$Class,
+                   curve = T)
+}
+
+pr_func <- function(risk_type){
+  tryCatch(
+    PRROC::pr.curve(scores.class0 = all_risks[, risk_type],
+                    weights.class0 = all_risks$Class,
+                    curve = T),
+    error = function(c) NA)
+}
+```
+
+
+```{r}
+# filename = filenames[3]
+i <- 0
+t_ori <- tibble()
+t_2d <- tibble()
+t_1d <- tibble()
+pr_list <- vector('list', length = length(filenames))
+roc_list <- vector('list', length = length(filenames))
+
+for (filename in filenames){
+  i <- i + 1
+  risk_1d <- read_risks('risk_1D', filename) %>%
+    mutate(risk_1d = - risk_1d) # fix the sign flipped
+  risk_2d <- read_risks('risk_2D', filename)
+  risk_ori <- read_risks('risk_ori', filename)
+  all_risks <- list(risk_1d, risk_2d, risk_ori) %>%
+    reduce(left_join, by = c('Subj', 'Class'))
+  if (i == plot_i){
+    all_risks_i <- all_risks
+  }
+  
+  ctrls <- filter(all_risks, Class == 0)
+  cases <- filter(all_risks, Class == 1)
+  
+  t_ori <- bind_rows(t_ori, my_t_test('risk_ori'))
+  t_1d <- bind_rows(t_1d, my_t_test('risk_1d'))
+  t_2d <- bind_rows(t_2d, my_t_test('risk_2d'))
+  
+  pr_list[[i]] <- list(pr_ori = pr_func('risk_ori'),
+                       pr_1d = pr_func('risk_1d'),
+                       pr_2d = pr_func('risk_2d'))
+  
+  roc_list[[i]] <- list(roc_ori = roc_func('risk_ori'),
+                        roc_1d = roc_func('risk_1d'),
+                        roc_2d = roc_func('risk_2d'))
+}
+
+data.frame(t_ori, t_2d, t_1d) %>%
+  gather('RiskType', 'Risk') %>%
+  ggplot(aes(x = RiskType, y = Risk)) +
+  geom_boxplot()
+
+
+```
+
+### Plot an example:
+
+```{r}
+
+if (plot_ex){ # plot the last comparison
+  p_text <- data.frame(
+    x = rep(1.5, 3),
+    y = c(1.2, 27, 115),
+    RiskType = as.factor(c('Original', 'MB-MDR 1D', 'MB-MDR 2D')),
+    p = list(t_ori, t_1d, t_2d) %>% 
+      sapply(function(x) sprintf("P = %.3g", x[i, 'p.value']))
+  )
+  
+  plot_comp <- all_risks_i %>%
+    gather('RiskType', 'Risk', risk_1d, risk_2d, risk_ori) %>%
+    mutate(Class = as.factor(Class) %>% fct_recode(Healthy = '0', Case = '1')) %>%
+    mutate(RiskType = fct_recode(RiskType, 
+                                 `MB-MDR 1D` = 'risk_1d', 
+                                 `MB-MDR 2D` = 'risk_2d',
+                                 Original = 'risk_ori')) %>%
+    ggplot(aes(x = Class, y = Risk)) +
+    facet_wrap(~ RiskType, scale = 'free') +
+    # geom_violin(aes(fill = Class), scale = 'width', alpha = 0.5) +
+    geom_boxplot(aes(color = Class)) +
+    geom_jitter(aes(color = Class),
+                height = 0, width = 0.1, alpha = 0.1, stroke = 0) +
+    scale_color_brewer(palette = 'Dark2') +
+    theme_bw() +
+    labs(x = NULL) +
+    theme(legend.position = 'None') + 
+    geom_text(p_text, mapping = aes(x = x, y = y, label = p) , size = 3)
+  plot_comp
+  plot_comp %>% ggsave(filename = 'plot_comp.pdf', height = 3, width = 5)
+}
+  
+```
+
+## auPRCs, auROCs...
+
+```{r}
+pri <- pr_list[[plot_i]]
+roci <- roc_list[[plot_i]]
+pr_text <- data.frame(
+  label = c(
+    paste0('Original risk \n', c(round(pri$pr_ori$auc.integral, 3))),
+    paste0('MB-MDR 1D \n ', round(pri$pr_1d$auc.integral, 3)),
+    paste0('MB-MDR 2D \n', round(pri$pr_2d$auc.integral, 3))
+    ),
+  x = c(0.35, 0.33, 0.7),
+  y = c(0.32, 0.78, 0.6),
+  type = c('Original', '1D', '2D')
+)
+
+prr_ori <- as.data.frame(pri$pr_ori$curve)
+colnames(prr_ori) <- paste0(c('Recall', 'Precision', 'w'))
+prr_2d <- as.data.frame(pri$pr_2d$curve)
+colnames(prr_2d) <- paste0(c('Recall', 'Precision', 'w'))
+prr_1d <- as.data.frame(pri$pr_1d$curve)
+colnames(prr_1d) <- paste0(c('Recall', 'Precision', 'w'))
+
+pr <- rbind(prr_ori, prr_2d, prr_1d) %>% 
+  mutate(type = c(rep('Original', nrow(prr_ori)), 
+                  rep('2D', nrow(prr_2d)),
+                  rep('1D', nrow(prr_1d)))) %>%
+  ggplot(aes(Recall, Precision, color = type)) +
+  geom_path(size = 0.8) + theme_bw() + 
+  scale_color_manual(values = cbbPalette[c(3,6,8)]) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = seq(0, 1.1, 0.2), labels = scales::percent) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent) +
+  geom_text(pr_text, mapping = aes(x = x, y = y, label = label), size = 3) +
+  coord_fixed(ratio = 1) +
+  guides(color = FALSE)
+
+
+roc_text <- data.frame(
+  label = c(
+    paste0('Original risk \n', c(round(roci$roc_ori$auc, 3))),
+    paste0('MB-MDR 1D \n ', round(roci$roc_1d$auc, 3)),
+    paste0('MB-MDR 2D \n', round(roci$roc_2d$auc, 3))
+    ),
+  x = c(0.73, 0.28 , 0.7),
+  y = c(0.4, 0.6, 0.82),
+  type = c('Original', '1D', '2D')
+)
+
+rocr_ori <- as.data.frame(roci$roc_ori$curve)
+colnames(rocr_ori) <- paste0(c('FPR', 'TPR', 'w'))
+rocr_2d <- as.data.frame(roci$roc_2d$curve)
+colnames(rocr_2d) <- paste0(c('FPR', 'TPR', 'w'))
+rocr_1d <- as.data.frame(roci$roc_1d$curve)
+colnames(rocr_1d) <- paste0(c('FPR', 'TPR', 'w'))
+
+roc <- rbind(rocr_ori, rocr_2d, rocr_1d) %>% 
+  mutate(type = c(rep('Original', nrow(rocr_ori)), 
+                  rep('2D', nrow(rocr_2d)),
+                  rep('1D', nrow(rocr_1d)))) %>%
+  ggplot(aes(FPR, TPR, color = type)) +
+  geom_path(size = 0.8) + theme_bw() + 
+  scale_color_manual(values = cbbPalette[c(3,6,8)]) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = seq(0, 1.1, 0.2), labels = scales::percent) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent) +
+  geom_text(roc_text, mapping = aes(x = x, y = y, label = label), size = 3) +
+  coord_fixed(ratio = 1) +
+  guides(color = FALSE)
+
+(proc <- cowplot::plot_grid(roc, pr))
+ggsave(proc, filename = 'figs/test1.pdf', height = 3.2, width = 7)
+
+```
+
+
+Look at all AUCs:
+
+```{r}
+auROCs <- data.frame(rocs_ori = sapply(roc_list, function(x) x$roc_ori$auc),
+           rocs_1d = sapply(roc_list, function(x) x$roc_1d$auc),
+           rocs_2d = sapply(roc_list, function(x) x$roc_2d$auc)
+) %>%
+  gather('RiskType', 'auROC') %>%
+  mutate(RiskType = fct_recode(RiskType, 
+                               Original = 'rocs_ori',
+                               `MB-MDR 1D` = 'rocs_1d', 
+                               `MB-MDR 2D` = 'rocs_2d')) %>%
+  ggplot(aes(x = RiskType, y = auROC, color = RiskType)) +
+  geom_boxplot(outlier.size = NULL) +
+  geom_jitter(height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
+  theme_bw() +
+  scale_color_manual(values = cbbPalette[c(3,6,8)]) +
+  theme(legend.position = 'None') +
+  labs(x = NULL)
+
+get_auprc <- function(x, risktype){
+  tryCatch(x[[risktype]]$auc.integral,
+           error = function(c) NA)
+}
+
+auPRCs <- data.frame(prs_ori = sapply(pr_list, get_auprc, risktype = 'pr_ori'),
+           prs_1d = sapply(pr_list, get_auprc, risktype = 'pr_1d'),
+           prs_2d = sapply(pr_list, get_auprc, risktype = 'pr_2d')
+) %>%
+  gather('RiskType', 'auPRC') %>%
+  mutate(RiskType = fct_recode(RiskType, 
+                               Original = 'prs_ori',
+                               `MB-MDR 1D` = 'prs_1d', 
+                               `MB-MDR 2D` = 'prs_2d')) %>%
+  ggplot(aes(x = RiskType, y = auPRC, color = RiskType)) +
+  geom_boxplot(outlier.size = NULL) +
+  geom_jitter(height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
+  theme_bw() +
+  scale_color_manual(values = cbbPalette[c(3,6,8)]) +
+  theme(legend.position = 'None') +
+  labs(x = NULL)
+
+perf <- cowplot::plot_grid(auROCs, auPRCs)
+perf
+ggsave(perf, filename = 'figs/performances.pdf', height = 3.2, width = 7)
+```
+

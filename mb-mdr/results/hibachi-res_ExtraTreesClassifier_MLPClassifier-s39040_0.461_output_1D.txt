@@ -1,0 +1,13 @@
+Input File: reformatted-data/train/hibachi-res_ExtraTreesClassifier_MLPClassifier-s39040_0.461.txt
+Computation options used: -p 999 -r 1434211279 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X9                 17.001     0.001
+X2                  3.811     0.708
+X3                  2.868     0.854
+X0                  0         1
+X1                  0         1
+X4                  0         1
+X5                  0         1
+X6                  0         1
+X7                  0         1
+X8                  0         1

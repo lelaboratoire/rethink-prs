@@ -1,0 +1,13 @@
+Input File: reformatted-data/train/hibachi-res_BernoulliNB_ExtraTreesClassifier-s36230_0.078.txt
+Computation options used: -p 999 -r 1417051332 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X6                 5.288      0.411
+X4                 4.715      0.49
+X9                 4.606      0.49
+X0                 0          1
+X1                 0          1
+X2                 0          1
+X3                 0          1
+X5                 0          1
+X7                 0          1
+X8                 0          1

@@ -1,0 +1,298 @@
+---
+title: "Visualization"
+output: html_document
+---
+
+Set up:
+
+```{r}
+library(data.table)
+library(tidyverse)
+library(here)
+```
+
+```{r}
+rm(list = ls())
+set.seed(1.618)
+
+source(here('analysis', 'utils.R'))         # run utility functions
+source(here('analysis', 'viz_funcs.R'))     # run utility functions
+
+filenames <- list.files(
+  here('mb-mdr', 'reformatted-data', 'test'), 
+  pattern = '*.txt', full.names = F)
+plot_ex <- T # plot an example risk comparisons
+plot_i <- sample(seq(length(filenames)), 1)
+cbbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
+                "#0072B2", "#D55E00", "#CC79A7", "#c5679b", "#be548f")
+risk_methods <- c('ori', '1d', '2d', '3d', '12d')
+pthres <- 1
+```
+
+Load results:
+
+```{r}
+load(here('results', 'p1compare_results.Rdata'))
+```
+
+
+
+### Plot an example:
+
+#### auPRCs, auROCs...
+
+```{r}
+pri <- pr_list[[plot_i]]
+roci <- roc_list[[plot_i]]
+pr_text <- data.frame(
+  label = c(
+    paste0('PRS\n', c(round(pri$pr_ori$auc.integral, 3))),
+    paste0('MRS1\n ', round(pri$pr_1d$auc.integral, 3)),
+    paste0('MRS2\n', round(pri$pr_2d$auc.integral, 3)),
+    paste0('MRS3\n', round(pri$pr_3d$auc.integral, 3))
+    ),
+  x = c(0.35, 0.33, 0.7, 0.7),
+  y = c(0.32, 0.78, 0.6, 0.8),
+  type = c('PRS', '1D', '2D', '3D')
+)
+
+prr_ori <- as.data.frame(pri$pr_ori$curve) %>%
+  magrittr::set_colnames(c('Recall', 'Precision', 'w'))
+prr_1d <- as.data.frame(pri$pr_1d$curve) %>%
+  magrittr::set_colnames(c('Recall', 'Precision', 'w'))
+prr_2d <- as.data.frame(pri$pr_2d$curve) %>%
+  magrittr::set_colnames(c('Recall', 'Precision', 'w'))
+prr_3d <- as.data.frame(pri$pr_3d$curve) %>%
+  magrittr::set_colnames(c('Recall', 'Precision', 'w'))
+
+pr <- paste0('pr_', risk_methods) %>%
+  map2(c('PRS', '1D', '2D', '3D', '12D'), get_pr_curve) %>%
+  reduce(rbind) %>% 
+  magrittr::set_colnames(c('Recall', 'Precision', 'w', 'type')) %>%
+  ggplot(aes(Recall, Precision, color = type)) +
+  geom_path(size = 0.8) + theme_bw() + 
+  scale_color_manual(values = cbbPalette) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = seq(0, 1.1, 0.2), labels = scales::percent) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent) +
+  geom_text(pr_text, mapping = aes(x = x, y = y, label = label), size = 3) +
+  coord_fixed(ratio = 1) +
+  guides(color = FALSE)
+
+
+roc_text <- data.frame(
+  label = c(
+    paste0('PRS\n', c(round(roci$roc_ori$auc, 3))),
+    paste0('MRS1\n ', round(roci$roc_1d$auc, 3)),
+    paste0('MRS2\n', round(roci$roc_2d$auc, 3)),
+    paste0('MRS3\n', round(roci$roc_3d$auc, 3))
+    ),
+  x = c(0.73, 0.28 , 0.5, 0.8),
+  y = c(0.4, 0.6, 0.75, 0.82),
+  type = c('PRS', '1D', '2D', '3D')
+)
+
+roc <- paste0('roc_', risk_methods) %>%
+  map2(c('PRS', '1D', '2D', '3D', '12D'), get_roc_curve) %>%
+  reduce(rbind) %>% 
+  magrittr::set_colnames(c('FPR', 'TPR', 'w', 'type')) %>%
+  ggplot(aes(FPR, TPR, color = type)) +
+  geom_path(size = 0.8) + theme_bw() + 
+  scale_color_manual(values = cbbPalette) +
+  scale_x_continuous(limits = c(0, 1.05), breaks = seq(0, 1.1, 0.2), labels = scales::percent) +
+  scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, 0.2), labels = scales::percent) +
+  geom_text(roc_text, mapping = aes(x = x, y = y, label = label), size = 3) +
+  coord_fixed(ratio = 1) +
+  guides(color = FALSE)
+
+(proc <- cowplot::plot_grid(roc, pr))
+```
+
+
+
+```{r}
+ggsave(proc, filename = 'figs/ex1.pdf', height = 3.2, width = 7)
+ggsave(proc, filename = 'figs/ex1.svg', height = 3.2, width = 7)
+```
+
+
+Look at all AUCs:
+
+```{r}
+auROCs <- paste0('roc_', risk_methods) %>%
+  magrittr::set_names(paste0('rocs_', risk_methods)) %>%
+  map_df(~ sapply(roc_list, get_auroc, risktype = .x)) %>%
+  select(- rocs_3d) %>%
+  gather('RiskType', 'auROC') %>%
+  mutate(RiskType = risktype_recode('rocs', RiskType)) %>%
+  ggplot(aes(x = fct_reorder(RiskType, auROC), y = auROC, color = RiskType)) +
+  geom_boxplot(outlier.size = NULL) +
+  geom_jitter(height = 0, width = 0.2, alpha = 0.1, stroke = 0) +
+  theme_bw() +
+  # scale_color_manual(values = cbbPalette[]) +
+  theme(legend.position = 'None') +
+  labs(x = NULL) +
+  viridis::scale_color_viridis(discrete = T, end = 0.9, direction = -1)
+
+ggsave(auROCs, filename = 'figs/performances.pdf', height = 3.2, width = 3.5)
+ggsave(auROCs, filename = 'figs/performances.svg', height = 3.2, width = 3.5)
+```
+
+
+### auROC:
+1d
+```{r}
+df_1d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+                 rocs_1d = sapply(roc_list, get_auroc, risktype = 'roc_1d')) %>%
+  mutate(dif = (rocs_1d - rocs_ori), better = dif > 0) %>%
+  rownames_to_column('dataset') %>%
+  gather('RiskType', 'auROC', rocs_ori, rocs_1d) %>%
+  mutate(RiskType = risktype_recode('rocs', RiskType))
+
+plot_performances(df_1d, method = 'MRS1', metric = 'auROC')
+```
+
+2d
+```{r}
+df_2d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+           rocs_2d = sapply(roc_list, get_auroc, risktype = 'roc_2d')) %>%
+  mutate(dif = (rocs_2d - rocs_ori), better = dif > 0) %>%
+  rownames_to_column('dataset') %>%
+  gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
+  mutate(RiskType = risktype_recode('rocs', RiskType))
+
+plot_performances(df_2d, method = 'MRS2', metric = 'auROC')
+
+```
+
+
+1d + 2d
+```{r}
+df_12d <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+           rocs_12d = sapply(roc_list, get_auroc, risktype = 'roc_12d')) %>%
+  mutate(dif = (rocs_12d - rocs_ori), better = dif > 0) %>%
+  rownames_to_column('dataset') %>%
+  gather('RiskType', 'auROC', - dataset, - better, -dif) %>%
+  mutate(RiskType = risktype_recode('rocs', RiskType))
+
+plot_performances(df_12d, method = 'MRS', metric = 'auROC', pthres = pthres)
+
+```
+
+
+Does improvement in the performance relate to how much interaction there is in a dataset?
+```{r}
+info_gain <- read_info('information_gain.csv', '2-way information gain')
+mutual_info_1d <- read_info('mutual_infomation_1d.csv', '1-way mutual information')
+
+all_rocs <- data.frame(
+  PRS = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+  MRS1 = sapply(roc_list, get_auroc, risktype = 'roc_1d'),
+  MRS2 = sapply(roc_list, get_auroc, risktype = 'roc_2d'),
+  MRS = sapply(roc_list, get_auroc, risktype = 'roc_12d')) %>%
+  mutate(`MRS1 - PRS` = MRS1 - PRS,
+         `MRS2 - PRS` = MRS2 - PRS,
+         `MRS2 - MRS1` = MRS2 - MRS1,
+         `MRS - PRS` = MRS - PRS) %>%
+  rownames_to_column('dataset') %>%
+  left_join(info_gain, by = 'dataset') %>%
+  left_join(mutual_info_1d, by = c('dataset', 'filenames')) 
+
+improvement_plot <- all_rocs %>%
+  gather('Methods', 'Difference', contains(' - ')) %>%
+  gather('InformationType', 'value', contains('way')) %>%
+  ggplot(aes(x = value, y = Difference)) +
+  facet_grid(rows = vars(fct_inorder(Methods)), cols = vars(InformationType), scales = 'free') +
+  geom_point(alpha = 0.3, stroke = 0) +
+  geom_smooth(color = 'grey40') +
+  labs(x = NULL, y = bquote(Delta~'auROC')) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
+  theme_bw()
+
+improvement_plot %>%
+  ggsave(filename = here('figs', 'improvements_train.pdf'), height = 6, width = 4)
+
+improvement_plot %>%
+  ggsave(filename = here('figs', 'improvements_train.svg'), height = 6, width = 4)
+```
+
+
+```{r}
+improvement_plot <- all_rocs %>%
+  dplyr::select(-`MRS2 - MRS1`) %>%
+  gather('Methods', 'Difference', contains(' - ')) %>%
+  gather('InformationType', 'value', contains('way')) %>%
+  ggplot(aes(x = value, y = Difference)) +
+  facet_grid(rows = vars(fct_inorder(Methods)), cols = vars(InformationType), scales = 'free') +
+  geom_point(alpha = 0.3, stroke = 0) +
+  geom_smooth(color = 'grey40') +
+    labs(x = NULL, y = bquote(Delta~'auROC')) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
+  theme_bw()
+
+improvement_plot %>%
+  ggsave(filename = here('figs', 'improvements_train_ms.pdf'), height = 4.5, width = 4)
+
+improvement_plot %>%
+  ggsave(filename = here('figs', 'improvements_train_ms.svg'), height = 4.5, width = 4)
+```
+
+But information is currently computed on the training set only. What about testing?
+
+```{r}
+info_gain <- read_info('information_gain_test.csv', '2-way information gain')
+mutual_info_1d <- read_info('mutual_infomation_1d_test.csv', '1-way mutual information')
+
+all_rocs <- data.frame(
+  PRS = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+  MRS1 = sapply(roc_list, get_auroc, risktype = 'roc_1d'),
+  MRS2 = sapply(roc_list, get_auroc, risktype = 'roc_2d'),
+  MRS = sapply(roc_list, get_auroc, risktype = 'roc_12d')) %>%
+  mutate(`MRS1 - PRS` = MRS1 - PRS,
+         `MRS2 - MRS1` = MRS2 - MRS1,
+         `MRS - PRS` = MRS - PRS) %>%
+  rownames_to_column('dataset') %>%
+  left_join(info_gain, by = 'dataset') %>%
+  left_join(mutual_info_1d, by = c('dataset', 'filenames')) 
+
+improvement_plot <- all_rocs %>%
+  gather('Methods', 'Difference', contains(' - ')) %>%
+  gather('InformationType', 'value', contains('way')) %>%
+  ggplot(aes(x = value, y = Difference)) +
+  facet_grid(rows = vars(fct_inorder(Methods)), cols = vars(InformationType), scales = 'free') +
+  geom_point(alpha = 0.3, stroke = 0) +
+  geom_smooth(color = 'grey40') +
+    labs(x = NULL, y = bquote(Delta~'auROC')) +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
+  theme_bw()
+
+ggsave(improvement_plot,
+       filename = here('figs', 'improvements_test.pdf'), 
+       height = 4.5, width = 4)
+ggsave(improvement_plot,
+       filename = here('figs', 'improvements_test.svg'), 
+       height = 4.5, width = 4)
+```
+
+
+
+```{r}
+# performances_info_gain('MRS', 'PRS') %>% 
+#   ggsave(filename = 'figs/mrs-prs-2d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS2', 'MRS1') %>% 
+#   ggsave(filename = 'figs/mrs2-mrs1-2d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS1', 'PRS') %>% 
+#   ggsave(filename = 'figs/mrs1-prs-2d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS2', 'MRS1', mutual_info_1d, 'Total (1-way) mutual information') %>%
+#   ggsave(filename = 'figs/mrs2-mrs1-1d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS1', 'PRS', mutual_info_1d, 'Total (1-way) mutual information') %>%
+#   ggsave(filename = 'figs/mrs1-prs-1d.pdf', height = 3, width = 4)
+# 
+# performances_info_gain('MRS', 'PRS', mutual_info_1d, 'Total (1-way) mutual information') %>% 
+#   ggsave(filename = 'figs/mrs-prs-1d.pdf', height = 3, width = 4)
+```
+
+
