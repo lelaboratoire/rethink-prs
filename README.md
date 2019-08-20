@@ -6,8 +6,20 @@ This repository contains detailed simulation and analysis code needed to reprodu
 Trang T. Le, Hoyt Gong, Patryk Orzechowski, Elisabetta Manduchi, Jason H. Moore.
 In preparation.
 
+## Structure of the repository 
+
+Simulated datasets can be found in the [`simulated-data`](simulated-data) folder.
+
+The [`mb-mdr`](mb-mdr) contains the initial ETL of the simulated datasets for further analysis, numerically named based on the wrangling process.
+
+Resulting cleaned datasets are placed into the [`results`](results) folder?
+
+Figures in the resulting manuscript can be found in the [`figs`](figs) folder.
+
+We compare the results from mb-mdr to standard prs in [`analysis`](analysis) via a precision-recall & auROC analysis and visualize the results.
+
+
 ## Simulated data
-Simulated datasets are in [`simulated-data`](simulated-data).
 
 The primary objective of this data simulation process was to provide a comprehensive set of reproducible and diverse datasets for the current study.
 Containing 1000 individuals and 10 SNPs, each dataset was generated in the following manner.
