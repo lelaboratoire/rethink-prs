@@ -20,7 +20,7 @@ Visualization code is also placed here.
 
 - [`results`](results) contains auROC and auPRC of different risk score models as well as entropy-based measures of the simulated datasets.
 
-- Figures in the resulting manuscript are generated from [`analysis/visualization0.05.Rmd`](analysis/visualization0.05.Rmd) and can be found in the [`figs`](figs) folder.
+- Figures in the resulting manuscript are generated from [`analysis/visualization.Rmd`](analysis/visualization.Rmd) and can be found in the [`figs`](figs) folder.
 
 
 ## Simulated data
