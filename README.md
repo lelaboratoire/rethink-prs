@@ -1,13 +1,29 @@
-# Multilocus Risk Scores
+# Multilocus Risk Scores (MRS)
 
 This repository contains detailed simulation and analysis code needed to reproduce the results in this study:
 
 **Expanding polygenic risk scores to include automatic genotype encodings and gene-gene interactions**.
 Trang T. Le, Hoyt Gong, Patryk Orzechowski, Elisabetta Manduchi, Jason H. Moore.
 In preparation.
+Click [here](https://lelaboratoire.github.io/rethink-prs-ms/) for the latest version of the manuscript.
+
+
+## Repository structure 
+
+- Simulated datasets can be found in the [`simulated-data`](simulated-data) folder.
+Details on data simulation are provided in the following section.
+
+- [`mb-mdr`](mb-mdr) contains all the steps necessary to arrive at the MB-MDR outputs and MRS calculated from these outputs (numerically named based on the order of the processing steps).
+
+- [`analysis`](analysis) contains code analyzing the performance of the MRS model as well as standard PRS, specifically the area under the precision-recall or receiver-operator characteristic curve (auPRC and auROC, respectively).
+Visualization code is also placed here.
+
+- [`results`](results) contains auROC and auPRC of different risk score models as well as entropy-based measures of the simulated datasets.
+
+- Figures in the resulting manuscript are generated from [`analysis/visualization0.05.Rmd`](analysis/visualization0.05.Rmd) and can be found in the [`figs`](figs) folder.
+
 
 ## Simulated data
-Simulated datasets are in [`simulated-data`](simulated-data).
 
 The primary objective of this data simulation process was to provide a comprehensive set of reproducible and diverse datasets for the current study.
 Containing 1000 individuals and 10 SNPs, each dataset was generated in the following manner.
