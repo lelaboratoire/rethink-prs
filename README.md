@@ -10,17 +10,17 @@ Click [here](https://lelaboratoire.github.io/rethink-prs-ms/) for the latest ver
 
 ## Repository structure 
 
-Simulated datasets can be found in the [`simulated-data`](simulated-data) folder.
+- Simulated datasets can be found in the [`simulated-data`](simulated-data) folder.
 Details on data simulation are provided in the following section.
 
-[`mb-mdr`](mb-mdr) contains all the steps necessary to arrive at the MB-MDR outputs and MRS calculated from these outputs (numerically named based on the order of the processing steps).
+- [`mb-mdr`](mb-mdr) contains all the steps necessary to arrive at the MB-MDR outputs and MRS calculated from these outputs (numerically named based on the order of the processing steps).
 
-[`analysis`](analysis) contains code analyzing the performance of the MRS model as well as standard PRS, specifically the area under the precision-recall or receiver-operator characteristic curve (auPRC and auROC, respectively).
+- [`analysis`](analysis) contains code analyzing the performance of the MRS model as well as standard PRS, specifically the area under the precision-recall or receiver-operator characteristic curve (auPRC and auROC, respectively).
 Visualization code is also placed here.
 
-[`results`](results) contains auROC and auPRC of different risk score models as well as entropy-based measures of the simulated datasets.
+- [`results`](results) contains auROC and auPRC of different risk score models as well as entropy-based measures of the simulated datasets.
 
-Figures in the resulting manuscript are generated from [`analysis/visualization0.05.Rmd`](analysis/visualization0.05.Rmd) and can be found in the [`figs`](figs) folder.
+- Figures in the resulting manuscript are generated from [`analysis/visualization0.05.Rmd`](analysis/visualization0.05.Rmd) and can be found in the [`figs`](figs) folder.
 
 
 ## Simulated data
