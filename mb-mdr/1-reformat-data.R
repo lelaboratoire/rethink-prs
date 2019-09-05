@@ -25,3 +25,21 @@ for (filename in filenames){
   fwrite(train_dat, paste0(mdr_path, 'reformatted-data/train/', filename), sep = '\t')
   fwrite(test_dat, paste0(mdr_path, 'reformatted-data/test/', filename), sep = '\t')
 }
+
+data_dir <- here::here('real-data')
+filename <- list.files(data_dir, pattern = '*.tsv')
+mydat <- paste(data_dir, filename, sep = '/') %>%
+  fread() %>%
+  mutate(Age = 2016 - YOB,
+         PHENOTYPE = PHENOTYPE - 1) %>%
+  dplyr::select(-c(FID, IID, Site, Platform, YOB)) %>%
+  dplyr::select(PHENOTYPE, Age, everything())
+
+mydat[1:100, 1:100] %>%
+  fwrite(paste0(mdr_path, 'reformatted-data/real-train/small_', 
+                gsub('.tsv', '.txt', filename)), sep = '\t')
+
+
+# trait: PHENOTYPE
+# covariates: Sex, Age, PC1-6
+
