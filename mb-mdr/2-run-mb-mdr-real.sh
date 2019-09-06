@@ -10,5 +10,5 @@ for dimension in 1D 2D; do
     -d $dimension \
     -o "${fname%.*}_output_$dimension.txt" \
     -o2 "${fname%.*}_model_$dimension.txt" \
-    "$fname"
+    "$fname" > /dev/null 2>&1
 done
