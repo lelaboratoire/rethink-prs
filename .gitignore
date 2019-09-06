@@ -6,5 +6,6 @@
 rethink-prs.Rproj
 analysis/.ipynb_checkpoints/
 
-# data
+# real glaucoma data
 real-data/
+mb-mdr/reformatted-data/real-train
