@@ -178,6 +178,23 @@ plot_performances(df_12d, method = 'MRS', metric = 'auROC', pthres = pthres)
 
 ```
 
+Test for significance of improvement:
+
+```{r}
+df_rocs_stat <- data.frame(rocs_ori = sapply(roc_list, get_auroc, risktype = 'roc_ori'),
+                           rocs_1d = sapply(roc_list, get_auroc, risktype = 'roc_1d'),
+                           rocs_2d = sapply(roc_list, get_auroc, risktype = 'roc_2d'), 
+                           rocs_12d = sapply(roc_list, get_auroc, risktype = 'roc_12d'))
+
+wilcox.test(df_rocs_stat$rocs_1d, df_rocs_stat$rocs_ori, 
+            paired = TRUE, alternative = 'greater')
+wilcox.test(df_rocs_stat$rocs_2d, df_rocs_stat$rocs_ori, 
+            paired = TRUE, alternative = 'greater')
+wilcox.test(df_rocs_stat$rocs_12d, df_rocs_stat$rocs_ori, 
+            paired = TRUE, alternative = 'greater')
+t.test(df_12d_stat$dif, alternative = 'greater')
+```
+
 
 Does improvement in the performance relate to how much interaction there is in a dataset?
 ```{r}
