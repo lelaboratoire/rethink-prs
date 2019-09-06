@@ -33,12 +33,16 @@ mydat <- paste(data_dir, filename, sep = '/') %>%
   mutate(Age = 2016 - YOB,
          PHENOTYPE = PHENOTYPE - 1) %>%
   dplyr::select(-c(FID, IID, Site, Platform, YOB)) %>%
-  dplyr::select(PHENOTYPE, Age, everything())
+  dplyr::select(PHENOTYPE, Age, everything()) %>%
+  replace(., is.na(.), -9) # recode NAs as -9 for MB-MDR
 
-mydat[1:100, 1:100] %>%
+mydat[, 1:100] %>%
   fwrite(paste0(mdr_path, 'reformatted-data/real-train/small_', 
                 gsub('.tsv', '.txt', filename)), sep = '\t')
 
+mydat %>%
+  fwrite(paste0(mdr_path, 'reformatted-data/real-train/', 
+                gsub('.tsv', '.txt', filename)), sep = '\t')
 
 # trait: PHENOTYPE
 # covariates: Sex, Age, PC1-6
