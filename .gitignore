@@ -10,3 +10,6 @@ analysis/.ipynb_checkpoints/
 real-data/
 mb-mdr/reformatted-data/real-train
 mb-mdr/reformatted-data/real-test
+
+# real results
+mb-mdr/results/real/
