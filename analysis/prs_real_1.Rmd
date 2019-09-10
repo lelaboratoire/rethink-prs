@@ -1,0 +1,61 @@
+---
+title: "Evaluating various scores of polygenic risk"
+output: html_document
+---
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+# data_dir <- 'reformatted-data/train'
+# filenames <- list.files(here('mb-mdr', 'reformatted-data'), 
+#                         pattern = '*.txt', full.names = T)
+
+alpha <- 1 # pvalue threshold, e.g. 1 = take all variants
+run_stir <- FALSE
+pthres <- 'real-p1'
+file_i <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
+
+```
+
+
+
+
+```{r}
+dat_train <- here::here('mb-mdr', 'reformatted-data', 'real-train', file_i) %>% 
+  data.table::fread() %>% 
+  data.frame()
+dat_test <- here::here('mb-mdr', 'reformatted-data', 'real-test', file_i) %>% 
+  data.table::fread() %>% 
+  data.frame()
+
+risk_file <- gsub('.txt', '_risk_ori.txt', file_i)
+nvars <- ncol(dat_train) - 1
+snps <- colnames(dat_train)[2:(nvars + 1)]
+coef_i <- matrix(NA, nrow = nvars, ncol = 2,
+                 dimnames = list(snps, c('beta_univar', 'pval')))
+for (snp in snps){
+  coef_i[snp, ] <- glm(expr(PHENOTYPE ~ !!sym(snp)), data = dat_train, family = 'binomial') %>%
+    summary() %>% 
+    with(coefficients) %>%
+    .[2, c('Estimate', 'Pr(>|z|)')]
+}
+
+betas_i <- coef_i %>%
+  data.frame() %>%
+  rownames_to_column('att') %>%
+  mutate(padj =  p.adjust(pval, method = 'BH')) %>%
+  filter(padj < alpha)
+
+prs_i <- dat_test %>%
+  dplyr::select(betas_i$att) %>%
+  as.matrix() %*% 
+  as.matrix(betas_i$beta) 
+
+cor.test(prs_i, dat_test$PHENOTYPE)
+data.frame(PHENOTYPE = dat_test$PHENOTYPE, risk_ori = prs_i) %>%
+  rownames_to_column('Subj') %>%
+  data.table::fwrite(here::here('mb-mdr', 'risks', pthres, risk_file))
+
+```
