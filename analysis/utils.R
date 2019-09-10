@@ -23,16 +23,16 @@ risktype_recode <- function(prefix = 'prs', x){
              `MRS` = paste0(prefix, '_12d'))
 }
 
-roc_func <- function(risk_type){
+roc_func <- function(risk_type, label = 'Class'){
   PRROC::roc.curve(scores.class0 = all_risks[, risk_type],
-                   weights.class0 = all_risks$Class,
+                   weights.class0 = all_risks[, label],
                    curve = T)
 }
 
-pr_func <- function(risk_type){
+pr_func <- function(risk_type, label = 'Class'){
   tryCatch(
     PRROC::pr.curve(scores.class0 = all_risks[, risk_type],
-                    weights.class0 = all_risks$Class,
+                    weights.class0 = all_risks[, label],
                     curve = T),
     error = function(c) NA)
 }
