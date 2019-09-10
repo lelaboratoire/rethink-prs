@@ -26,6 +26,10 @@ for (filename in filenames){
   fwrite(test_dat, paste0(mdr_path, 'reformatted-data/test/', filename), sep = '\t')
 }
 
+
+
+set.seed(1618)
+
 data_dir <- here::here('real-data')
 filename <- list.files(data_dir, pattern = '*.tsv')
 mydat <- paste(data_dir, filename, sep = '/') %>%
@@ -36,14 +40,24 @@ mydat <- paste(data_dir, filename, sep = '/') %>%
   dplyr::select(PHENOTYPE, Age, everything()) %>%
   replace(., is.na(.), -9) # recode NAs as -9 for MB-MDR
 
+# trait: PHENOTYPE
+# covariates: Sex, Age, PC1-6
+nsamp <- nrow(mydat)
+train_idx <- sample(seq(nsamp), floor(nsamp*0.8), replace = F)
+train_dat <- mydat[train_idx, ]
+test_dat <- mydat[-train_idx, ]
+
+table(train_dat$PHENOTYPE)
+table(test_dat$PHENOTYPE)
+
 mydat[, 1:100] %>%
   fwrite(paste0(mdr_path, 'reformatted-data/real-train/small_', 
                 gsub('.tsv', '.txt', filename)), sep = '\t')
 
-mydat %>%
+train_dat %>%
   fwrite(paste0(mdr_path, 'reformatted-data/real-train/', 
                 gsub('.tsv', '.txt', filename)), sep = '\t')
 
-# trait: PHENOTYPE
-# covariates: Sex, Age, PC1-6
-
+test_dat %>%
+  fwrite(paste0(mdr_path, 'reformatted-data/real-test/', 
+                gsub('.tsv', '.txt', filename)), sep = '\t')
