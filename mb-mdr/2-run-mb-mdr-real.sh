@@ -13,3 +13,6 @@ for dimension in 1D 2D; do
     -n 11000000 \
     "$fname" > /dev/null 2>&1
 done
+
+mv -f reformatted-data/real-train/*_1D.txt results/real/
+mv -f reformatted-data/real-train/*_2D.txt results/real/

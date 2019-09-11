@@ -111,8 +111,6 @@ for (filename in filenames){
     fwrite(here('mb-mdr', 'risks', risk_file))
 }
 
-
-  
 ```
 
 

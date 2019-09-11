@@ -34,10 +34,10 @@ dat <- here('mb-mdr', 'reformatted-data', 'real-test', filename) %>%
 snp_dat <- select(dat, - c(PHENOTYPE, Age, contains('PC')))
 
 # read in models
-raw_model <- here('mb-mdr', 'results', mod_file) %>%
+raw_model <- here('mb-mdr', 'results', 'real', mod_file) %>%
   read.table(fill = T, stringsAsFactors = F)
 
-chisq_df <- here('mb-mdr', 'results', out_file) %>%
+chisq_df <- here('mb-mdr', 'results', 'real', out_file) %>%
   fread(header = F, skip = 3, 
         col.names = c('ma1', 'chi_sq', 'p_val'))
 nrow_model <- nrow(chisq_df)
