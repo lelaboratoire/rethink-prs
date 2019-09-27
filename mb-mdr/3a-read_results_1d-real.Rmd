@@ -34,32 +34,32 @@ dat <- here('mb-mdr', 'reformatted-data', 'real-test', filename) %>%
 snp_dat <- select(dat, - c(PHENOTYPE, Age, contains('PC')))
 
 # read in models
+chisq_df <- here('mb-mdr', 'results', 'real', out_file) %>%
+  fread(header = F, skip = 3, 
+        col.names = c('ma1', 'chi_sq', 'p_val')) %>% 
+  filter(p_val != 1)
+keep_snps <- chisq_df$ma1
 raw_model <- here('mb-mdr', 'results', 'real', mod_file) %>%
   read.table(fill = T, stringsAsFactors = F)
 
-chisq_df <- here('mb-mdr', 'results', 'real', out_file) %>%
-  fread(header = F, skip = 3, 
-        col.names = c('ma1', 'chi_sq', 'p_val'))
-nrow_model <- nrow(chisq_df)
-
 # parse data
+nrow_model <- nrow(chisq_df)
 mdr_model <- list()
 for (i in seq(nrow_model)){
   idx <- row_1d * (i-1) + 1
   ma_names <- raw_model[idx, 1]
-  # if (ma_names == "rs1880909_C") print(idx)
-  mdr_model[[ma_names]] <- list(
+  if (ma_names %in% keep_snps){
+    mdr_model[[ma_names]] <- list(
     # affected = as_tibble(raw_model[idx + 2, ]),
     # unaffected = as_tibble(raw_model[idx + 4, ]),
     HLO = as_tibble(raw_model[idx + 6, ]) %>%
-      map_df(~ recode(.x, L = -1, H = 1, O = 0)) %>%
-      as.matrix()
-  )
+      map_df(~ recode(.x, L = -1, H = 1, O = 0, N = 0)) %>%
+      as.matrix())
+  }
 }
 
 # calculate risk
 risk_1d <- vector(mode = 'numeric', length = nrow(snp_dat))
-
 for (subj_idx in seq(nrow(snp_dat))){
   sum = 0
   for (j in seq(nrow(chisq_df))){
@@ -69,8 +69,10 @@ for (subj_idx in seq(nrow(snp_dat))){
       snp1_val <- snp_dat[subj_idx, ma]
       hlo <- mdr_model[[ma]]$HLO
 
-      if ((snp1_val != -9) & (!is.na(hlo[snp1_val + 1]))){ # if SNP1 is not missing
-        sum <- sum + hlo[snp1_val + 1]*chi_sq # check order here        
+      if ((snp1_val != -9)){ # if SNP1 is not missing
+        if (!is.na(hlo[snp1_val + 1])){
+          sum <- sum + hlo[snp1_val + 1]*chi_sq # check order here        
+        }
       }
     }
   }
@@ -83,7 +85,5 @@ result_df %>%
   rownames_to_column('Subj') %>%
   dplyr::select(Subj, PHENOTYPE, risk_1d) %>%
   fwrite(here('mb-mdr', 'risks', paste0('real-p', p_threshold), risk_file))
-  
-
 ```
 

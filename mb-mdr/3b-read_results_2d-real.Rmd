@@ -44,7 +44,9 @@ raw_model <- here('mb-mdr', 'results', 'real', mod_file) %>%
 chisq_df <- here('mb-mdr', 'results', 'real', out_file) %>%
   fread(header = F, skip = 3, 
         col.names = c('ma1', 'ma2', 'chi_sq', 'p_val')) %>%
-  mutate(ma_names = paste(ma1, ma2, sep = '-'))
+  mutate(ma_names = paste(ma1, ma2, sep = '-')) %>% 
+  filter(p_val != 1)
+keep_snps <- chisq_df$ma_names
 
 # parse data
 nrow_model <- floor((nrow(raw_model) + 1)/row_2d)
@@ -53,14 +55,22 @@ mdr_model <- list()
 for (i in seq(nrow_model)){
   idx <- row_2d * (i-1) + 1
   ma_names <- paste(raw_model[idx, 1:2], collapse = '-')
-  mdr_model[[ma_names]] <- list(
-    # affected = as_tibble(raw_model[idx + (2:4), ]),
-    # unaffected = as_tibble(raw_model[idx + (6:8), ]),
-    HLO = as_tibble(raw_model[idx + (10:12), ]) %>%
-      map_df(~ recode(.x, L = -1, H = 1, O = 0)) %>%
-      as.matrix()
-  )
+  if (ma_names %in% keep_snps){
+    mdr_model[[ma_names]] <- list(
+      # affected = as_tibble(raw_model[idx + (2:4), ]),
+      # unaffected = as_tibble(raw_model[idx + (6:8), ]),
+      HLO = as_tibble(raw_model[idx + (10:12), ]) %>%
+        map_df(~ recode(.x, L = -1, H = 1, O = 0, N = 0)) %>%
+        as.matrix()
+    )
+  }
 }
+
+
+```
+
+
+```{r}
 
 # calculate risk
 risk_2d <- vector(mode = 'numeric', length = nrow(snp_dat))
@@ -91,9 +101,7 @@ result_df %>%
   dplyr::select(Subj, PHENOTYPE, risk_2d) %>%
   fwrite(here('mb-mdr', 'risks', paste0('real-p', p_threshold), risk_file))
   
-
 ```
-
 
 Q: How compatible is this compared to -d 1D? 3D?
 TODO: split into training + testing
