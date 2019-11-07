@@ -1,0 +1,13 @@
+Input File: reformatted-data/train/hibachi-res_MLPClassifier_RandomForestClassifier-s44196_0.488.txt
+Computation options used: -p 999 -r 1467237034 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X1                 7.265      0.183
+X7                 3.936      0.671
+X2                 3.350      0.774
+X3                 3.187      0.774
+X4                 3.151      0.774
+X6                 2.865      0.774
+X0                 0          1
+X5                 0          1
+X8                 0          1
+X9                 0          1

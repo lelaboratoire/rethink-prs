@@ -1,0 +1,13 @@
+Input File: reformatted-data/train/hibachi-res_DecisionTreeClassifier_ExtraTreesClassifier-s62864_0.079.txt
+Computation options used: -p 999 -r 1424026237 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X0                 11.056     0.026
+X7                  8.759     0.074
+X2                  2.930     0.84
+X5                  2.741     0.84
+X1                  0         1
+X3                  0         1
+X4                  0         1
+X6                  0         1
+X8                  0         1
+X9                  0         1

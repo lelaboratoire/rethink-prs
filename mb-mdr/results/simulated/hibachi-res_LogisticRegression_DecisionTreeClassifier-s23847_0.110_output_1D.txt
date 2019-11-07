@@ -1,0 +1,13 @@
+Input File: reformatted-data/train/hibachi-res_LogisticRegression_DecisionTreeClassifier-s23847_0.110.txt
+Computation options used: -p 999 -r 1456480554 -m 10 -a NONE -mt gammaMAXT -d 1D  -x 0.1
+First Marker      Chi-square p-value
+X1                 9.393      0.058
+X7                 8.431      0.096
+X6                 6.623      0.21
+X2                 5.636      0.294
+X8                 4.791      0.37
+X4                 3.264      0.6
+X0                 0          1
+X3                 0          1
+X5                 0          1
+X9                 0          1
