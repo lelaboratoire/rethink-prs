@@ -15,7 +15,8 @@ library(tidyverse)
 alpha <- 1 # pvalue threshold, e.g. 1 = take all variants
 run_stir <- FALSE
 pthres <- 'real-p1'
-file_i <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
+file_i <- 'small_Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
+# file_i <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno.txt'
 
 ```
 
@@ -46,9 +47,10 @@ betas_i <- coef_i %>%
   data.frame() %>%
   rownames_to_column('att') %>%
   mutate(padj =  p.adjust(pval, method = 'BH')) %>%
-  filter(padj < alpha)
+  filter(padj < alpha,
+         !grepl('Age|Sex|PC', att))
 
-prs_i <- dat_test %>%
+prs_i <- select(dat_test, - c(PHENOTYPE, Age, contains('PC'))) %>%
   dplyr::select(betas_i$att) %>%
   as.matrix() %*% 
   as.matrix(betas_i$beta) 

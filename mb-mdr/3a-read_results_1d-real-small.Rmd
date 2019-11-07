@@ -16,13 +16,13 @@ Each subject risk score = chi_sq * (their value (HLO) at snp1_snp2)
 ```{r}
 rm(list = ls())
 row_1d <- 7
-p_threshold <- 1.1
+p_threshold <- 1
 
 sub_name <- function(filetype, my_file){
   gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
 }
 
-filename <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno.txt'
+filename <- 'small_Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
 mod_file <- sub_name('model_1D', filename)
 out_file <- sub_name('output_1D', filename)
 risk_file <- sub_name('risk_1D', filename)

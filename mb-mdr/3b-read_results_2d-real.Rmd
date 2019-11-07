@@ -25,7 +25,8 @@ sub_name <- function(filetype, my_file){
   gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
 }
 
-filename <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
+filename <- 'small_Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
+# filename <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno.txt'
 
 mod_file <- sub_name('model_2D', filename)
 out_file <- sub_name('output_2D', filename)
@@ -35,7 +36,8 @@ risk_file <- sub_name('risk_2D', filename)
 dat <- here('mb-mdr', 'reformatted-data', 'real-test', filename) %>% 
   fread() %>% 
   data.frame()
-snp_dat <- select(dat, - c(PHENOTYPE, Age, contains('PC')))
+# snp_dat <- select(dat, - c(PHENOTYPE, Age, contains('PC')))
+snp_dat <- select(dat, - c(PHENOTYPE))
 
 # read in models
 raw_model <- here('mb-mdr', 'results', 'real', mod_file) %>%
@@ -44,8 +46,9 @@ raw_model <- here('mb-mdr', 'results', 'real', mod_file) %>%
 chisq_df <- here('mb-mdr', 'results', 'real', out_file) %>%
   fread(header = F, skip = 3, 
         col.names = c('ma1', 'ma2', 'chi_sq', 'p_val')) %>%
-  mutate(ma_names = paste(ma1, ma2, sep = '-')) %>% 
-  filter(p_val != 1)
+  mutate(ma_names = paste(ma1, ma2, sep = '-'))
+# %>% 
+  # filter(p_val != 1)
 keep_snps <- chisq_df$ma_names
 
 # parse data
@@ -56,6 +59,7 @@ for (i in seq(nrow_model)){
   idx <- row_2d * (i-1) + 1
   ma_names <- paste(raw_model[idx, 1:2], collapse = '-')
   if (ma_names %in% keep_snps){
+    # print(ma_names)
     mdr_model[[ma_names]] <- list(
       # affected = as_tibble(raw_model[idx + (2:4), ]),
       # unaffected = as_tibble(raw_model[idx + (6:8), ]),
@@ -77,9 +81,11 @@ risk_2d <- vector(mode = 'numeric', length = nrow(snp_dat))
 
 for (subj_idx in seq(nrow(snp_dat))){
   sum = 0
+  # print(subj_idx)
   for (j in seq(nrow(chisq_df))){
-    if (chisq_df$p_val[j] < p_threshold){
+    if (chisq_df$p_val[j] <= p_threshold){
       ma_pair <- chisq_df$ma_names[j] # e.g. X1_X2
+      # cat(ma_pair, '\n\n')
       chi_sq <- chisq_df$chi_sq[j] # chi-squared values of that SNP comb
       mas <- strsplit(ma_pair, '-') %>% unlist # SNPs names, e.g. c('X1', 'X2')
       snp1_val <- snp_dat[subj_idx, mas[1]]
@@ -92,6 +98,7 @@ for (subj_idx in seq(nrow(snp_dat))){
     }
   }
   risk_2d[subj_idx] <- sum
+  print(sum)
 }
 
 result_df <- data.frame(risk_2d, dat) 

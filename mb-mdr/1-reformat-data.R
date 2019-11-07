@@ -50,9 +50,31 @@ test_dat <- mydat[-train_idx, ]
 table(train_dat$PHENOTYPE)
 table(test_dat$PHENOTYPE)
 
-mydat[, 1:100] %>%
-  fwrite(paste0(mdr_path, 'reformatted-data/real-train/small_', 
+
+
+gwas_cat_snps <-
+  readr::read_csv(here::here('gwas-catalog-snps.csv'), col_names = F) %>% pull()
+pubmed_snps <-
+  readr::read_csv(here::here('pubmed-snps.csv'), col_names = F) %>% pull()
+simplified_snps <-
+  stringr::str_split(colnames(mydat), '_', simplify = TRUE)[, 1]
+overlapping_snps <- union(pubmed_snps, gwas_cat_snps) %>%
+  intersect(simplified_snps)
+
+
+
+mydat_small <- mydat %>% 
+  select(1:100, sapply(overlapping_snps, contains))
+
+
+
+mydat_small[train_idx, ] %>%
+  fwrite(paste0(mdr_path, 'reformatted-data/real-train/small_',
                 gsub('.tsv', '.txt', filename)), sep = '\t')
+mydat_small[-train_idx, ] %>%
+  fwrite(paste0(mdr_path, 'reformatted-data/real-test/small_',
+                gsub('.tsv', '.txt', filename)), sep = '\t')
+
 
 train_dat %>%
   fwrite(paste0(mdr_path, 'reformatted-data/real-train/', 
@@ -61,3 +83,14 @@ train_dat %>%
 test_dat %>%
   fwrite(paste0(mdr_path, 'reformatted-data/real-test/', 
                 gsub('.tsv', '.txt', filename)), sep = '\t')
+
+
+train_dat %>%
+  select(-c(Age, Sex, paste0('PC', 1:6))) %>% 
+  fwrite(paste0(mdr_path, 'reformatted-data/real-train/', 
+                gsub('_covariates.tsv', '.txt', filename)), sep = '\t')
+
+test_dat %>%
+  select(-c(Age, Sex, paste0('PC', 1:6))) %>% 
+  fwrite(paste0(mdr_path, 'reformatted-data/real-test/', 
+                gsub('_covariates.tsv', '.txt', filename)), sep = '\t')

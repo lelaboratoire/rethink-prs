@@ -16,7 +16,7 @@ set.seed(1.618)
 source('analysis/utils.R') # run utility functions
 
 plot_ex <- T # plot an example risk comparisons
-plot_i <- sample(seq(length(filenames)), 1)
+# plot_i <- sample(seq(length(filenames)), 1)
 # cbbPalette <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", 
 #                 "#0072B2", "#D55E00", "#CC79A7", "#c5679b", "#be548f")
 ```
@@ -29,7 +29,9 @@ i <- 0
 risk_methods <- c('ori', '1d', '2d', '12d')
 pthres <- 'real-p1'
 
-filename <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
+# filename <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
+# filename <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno.txt'
+filename <- 'small_Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
 
 risk_1d <- read_risks(pthres, 'risk_1D', filename) %>%
   mutate(risk_1d = - risk_1d) # fix the sign flipped in mb-mdr v.4.4.1
@@ -44,6 +46,7 @@ all_risks <- list(risk_ori, risk_1d, risk_2d) %>%
 
 cor.test(all_risks$risk_ori, all_risks$PHENOTYPE)
 cor.test(all_risks$risk_1d, all_risks$PHENOTYPE)
+cor.test(all_risks$risk_2d, all_risks$PHENOTYPE)
 
 ctrls <- filter(all_risks, PHENOTYPE == 0)
 cases <- filter(all_risks, PHENOTYPE == 1)
@@ -57,6 +60,6 @@ roc_list <- paste0('risk_', risk_methods) %>%
   magrittr::set_names(paste0('roc_', risk_methods))
 
 
-save(roc_list, pr_list, file = here('results', paste0(pthres, 'compare_results_real.Rdata')))
+# save(roc_list, pr_list, file = here('results', paste0(pthres, 'compare_results_real.Rdata')))
 ```
 
