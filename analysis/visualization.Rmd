@@ -238,20 +238,38 @@ improvement_plot <- all_rocs %>%
   dplyr::select(-`MRS2 - MRS1`) %>%
   gather('Methods', 'Difference', contains(' - ')) %>%
   gather('InformationType', 'value', contains('way')) %>%
+  mutate(
+    InformationType = recode(
+      InformationType,
+      `2-way information gain` = 'Amount of interaction effect',
+      `1-way mutual information` = 'Amount of main effect'
+    )
+  ) %>%
   ggplot(aes(x = value, y = Difference)) +
-  facet_grid(rows = vars(fct_inorder(Methods)), cols = vars(InformationType), scales = 'free') +
+  facet_grid(
+    rows = vars(fct_inorder(Methods)),
+    cols = vars(fct_rev(InformationType)),
+    scales = 'free',
+    switch = 'x'
+  ) +
   geom_point(alpha = 0.3, stroke = 0) +
   geom_smooth(color = 'grey40') +
-    labs(x = NULL, y = bquote(Delta~'auROC')) +
+  labs(x = NULL, y = bquote(Delta ~ 'auROC')) +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 3)) +
-  theme_bw()
+  theme_bw() +
+  theme(
+    strip.placement = 'outside',
+    axis.title.x = element_blank(),
+    strip.background.x = element_blank()
+  )
 
 improvement_plot %>%
-  ggsave(filename = here('figs', 'improvements_train_ms.pdf'), height = 4.5, width = 4)
+  ggsave(filename = here('figs', 'improvements_train_ms.pdf'), height = 4.5, width = 4.1)
 
 improvement_plot %>%
-  ggsave(filename = here('figs', 'improvements_train_ms.svg'), height = 4.5, width = 4)
+  ggsave(filename = here('figs', 'improvements_train_ms.svg'), height = 4.5, width = 4.1)
 ```
+
 
 But information is currently computed on the training set only. What about testing?
 
