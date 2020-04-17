@@ -19,7 +19,7 @@ library(tibble)
 
 ```{r}
 rm(list = ls())
-results_dir <- here('mb-mdr', 'results')
+results_dir <- here('mb-mdr', 'results', 'simulated')
 filenames <- list.files(here('mb-mdr', 'reformatted-data', 'test'), 
                         pattern = '*.txt', full.names = F)
 sub_name <- function(filetype, my_file){
@@ -111,8 +111,6 @@ for (filename in filenames){
     fwrite(here('mb-mdr', 'risks', risk_file))
 }
 
-
-  
 ```
 
 

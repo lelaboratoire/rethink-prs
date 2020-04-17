@@ -1,0 +1,115 @@
+---
+title: "Read in results"
+output: html_document
+---
+
+```{r}
+library(data.table)
+library(tidyverse)
+library(here)
+# also use: glue
+```
+
+## Methods
+Each subject risk score = chi_sq * (their value (HLO) at snp1_snp2)
+
+```{r}
+rm(list = ls())
+row_2d <- 14
+p_threshold <- 1
+
+filenames <- list.files(here('mb-mdr', 'reformatted-data', 'test'), 
+                        pattern = '*.txt', full.names = F)
+
+sub_name <- function(filetype, my_file){
+  gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
+}
+
+filename <- 'small_Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno_covariates.txt'
+# filename <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno.txt'
+
+mod_file <- sub_name('model_2D', filename)
+out_file <- sub_name('output_2D', filename)
+risk_file <- sub_name('risk_2D', filename)
+
+# read in test data
+dat <- here('mb-mdr', 'reformatted-data', 'real-test', filename) %>% 
+  fread() %>% 
+  data.frame()
+# snp_dat <- select(dat, - c(PHENOTYPE, Age, contains('PC')))
+snp_dat <- select(dat, - c(PHENOTYPE))
+
+# read in models
+raw_model <- here('mb-mdr', 'results', 'real', mod_file) %>%
+  fread(fill = T, header = F) %>%
+  data.frame()
+chisq_df <- here('mb-mdr', 'results', 'real', out_file) %>%
+  fread(header = F, skip = 3, 
+        col.names = c('ma1', 'ma2', 'chi_sq', 'p_val')) %>%
+  mutate(ma_names = paste(ma1, ma2, sep = '-'))
+# %>% 
+  # filter(p_val != 1)
+keep_snps <- chisq_df$ma_names
+
+# parse data
+nrow_model <- floor((nrow(raw_model) + 1)/row_2d)
+mdr_model <- list()
+
+for (i in seq(nrow_model)){
+  idx <- row_2d * (i-1) + 1
+  ma_names <- paste(raw_model[idx, 1:2], collapse = '-')
+  if (ma_names %in% keep_snps){
+    # print(ma_names)
+    mdr_model[[ma_names]] <- list(
+      # affected = as_tibble(raw_model[idx + (2:4), ]),
+      # unaffected = as_tibble(raw_model[idx + (6:8), ]),
+      HLO = as_tibble(raw_model[idx + (10:12), ]) %>%
+        map_df(~ recode(.x, L = -1, H = 1, O = 0, N = 0)) %>%
+        as.matrix()
+    )
+  }
+}
+
+
+```
+
+
+```{r}
+
+# calculate risk
+risk_2d <- vector(mode = 'numeric', length = nrow(snp_dat))
+
+for (subj_idx in seq(nrow(snp_dat))){
+  sum = 0
+  # print(subj_idx)
+  for (j in seq(nrow(chisq_df))){
+    if (chisq_df$p_val[j] <= p_threshold){
+      ma_pair <- chisq_df$ma_names[j] # e.g. X1_X2
+      # cat(ma_pair, '\n\n')
+      chi_sq <- chisq_df$chi_sq[j] # chi-squared values of that SNP comb
+      mas <- strsplit(ma_pair, '-') %>% unlist # SNPs names, e.g. c('X1', 'X2')
+      snp1_val <- snp_dat[subj_idx, mas[1]]
+      snp2_val <- snp_dat[subj_idx, mas[2]]
+      
+      if ((snp1_val != -9) & (snp2_val != -9)){ 
+        hlo <- mdr_model[[ma_pair]]$HLO
+        sum <- sum + hlo[snp1_val + 1, snp2_val + 1]*chi_sq # check order here
+      }
+    }
+  }
+  risk_2d[subj_idx] <- sum
+  print(sum)
+}
+
+result_df <- data.frame(risk_2d, dat) 
+
+result_df %>% 
+  rownames_to_column('Subj') %>%
+  dplyr::select(Subj, PHENOTYPE, risk_2d) %>%
+  fwrite(here('mb-mdr', 'risks', paste0('real-p', p_threshold), risk_file))
+  
+```
+
+Q: How compatible is this compared to -d 1D? 3D?
+TODO: split into training + testing
+What about thresholding?

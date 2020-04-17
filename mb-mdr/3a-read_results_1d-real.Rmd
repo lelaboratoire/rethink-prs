@@ -1,0 +1,91 @@
+---
+title: "Read in results"
+output: html_document
+---
+
+```{r}
+library(data.table)
+library(tidyverse)
+library(here)
+# also use: glue
+```
+
+## Methods
+Each subject risk score = chi_sq * (their value (HLO) at snp1_snp2)
+
+```{r}
+rm(list = ls())
+row_1d <- 7
+p_threshold <- 1.1
+
+sub_name <- function(filetype, my_file){
+  gsub('.txt', glue::glue('_{filetype}.txt'), my_file)
+}
+
+filename <- 'Glaucoma_results_snps_pval0.01_6PCs_prune0.6_wPheno.txt'
+mod_file <- sub_name('model_1D', filename)
+out_file <- sub_name('output_1D', filename)
+risk_file <- sub_name('risk_1D', filename)
+
+# read in test data
+dat <- here('mb-mdr', 'reformatted-data', 'real-test', filename) %>% 
+  fread() %>% 
+  data.frame()
+# snp_dat <- select(dat, - c(PHENOTYPE, Age, contains('PC')))
+snp_dat <- select(dat, - c(PHENOTYPE))
+
+# read in models
+chisq_df <- here('mb-mdr', 'results', 'real', out_file) %>%
+  fread(header = F, skip = 3, 
+        col.names = c('ma1', 'chi_sq', 'p_val')) 
+# %>% 
+  # filter(p_val != 1)
+keep_snps <- chisq_df$ma1
+raw_model <- here('mb-mdr', 'results', 'real', mod_file) %>%
+  read.table(fill = T, stringsAsFactors = F)
+
+# parse data
+nrow_model <- nrow(chisq_df)
+mdr_model <- list()
+for (i in seq(nrow_model)){
+  idx <- row_1d * (i-1) + 1
+  ma_names <- raw_model[idx, 1]
+  if (ma_names %in% keep_snps){
+    mdr_model[[ma_names]] <- list(
+    # affected = as_tibble(raw_model[idx + 2, ]),
+    # unaffected = as_tibble(raw_model[idx + 4, ]),
+    HLO = as_tibble(raw_model[idx + 6, ]) %>%
+      map_df(~ recode(.x, L = -1, H = 1, O = 0, N = 0)) %>%
+      as.matrix())
+  }
+}
+
+# calculate risk
+risk_1d <- vector(mode = 'numeric', length = nrow(snp_dat))
+for (subj_idx in seq(nrow(snp_dat))){
+  sum = 0
+  for (j in seq(nrow(chisq_df))){
+    if (chisq_df$p_val[j] < p_threshold){
+      ma <- chisq_df$ma1[j] # e.g. X4
+      chi_sq <- chisq_df$chi_sq[j] # chi-squared values of that SNP comb
+      snp1_val <- snp_dat[subj_idx, ma]
+      hlo <- mdr_model[[ma]]$HLO
+
+      if ((snp1_val != -9)){ # if SNP1 is not missing
+        if (!is.na(hlo[snp1_val + 1])){
+          sum <- sum + hlo[snp1_val + 1]*chi_sq # check order here        
+        }
+      }
+    }
+  }
+  risk_1d[subj_idx] <- sum
+}
+
+result_df <- data.frame(risk_1d, dat)
+
+result_df %>% 
+  rownames_to_column('Subj') %>%
+  dplyr::select(Subj, PHENOTYPE, risk_1d) %>%
+  fwrite(here('mb-mdr', 'risks', paste0('real-p', p_threshold), risk_file))
+```
+

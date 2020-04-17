@@ -37,12 +37,12 @@ for (filename in filenames){
   snp_dat <- select(dat, - Class)
 
   # read in models
-  raw_model <- here('mb-mdr', 'results', mod_file) %>%
+  raw_model <- here('mb-mdr', 'results', 'simulated', mod_file) %>%
     read.table(fill = T, stringsAsFactors = F)
     # fread(fill = T, header = F) %>%
     # data.frame()
   
-  chisq_df <- here('mb-mdr', 'results', out_file) %>%
+  chisq_df <- here('mb-mdr', 'results', 'simulated', out_file) %>%
     fread(header = F, skip = 3, 
           col.names = c('ma1', 'chi_sq', 'p_val'))
   nrow_model <- nrow(chisq_df)
@@ -67,7 +67,7 @@ for (filename in filenames){
   for (subj_idx in seq(nrow(snp_dat))){
     sum = 0
     for (j in seq(nrow(chisq_df))){
-      if (chisq_df$p_val[j] < p_threshold){
+      if (chisq_df$p_val[j] <= p_threshold){
         ma <- chisq_df$ma1[j] # e.g. X4
         chi_sq <- chisq_df$chi_sq[j] # chi-squared values of that SNP comb
         

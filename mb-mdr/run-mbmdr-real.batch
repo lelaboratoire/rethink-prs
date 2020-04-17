@@ -1,0 +1,13 @@
+#!/bin/bash
+#BSUB -J mbmdr_glaucoma
+#BSUB -o /home/ttle/mrs/log/mbmdr_glaucoma.log
+#BSUB -e /home/ttle/mrs/log/mbmdr_glaucoma.err
+#BSUB -q moore_normal
+#BSUB -M 60000
+#BSUB -R "span[hosts=1]"
+#BSUB -n 1
+
+#export PATH="/home/ttle/anaconda/bin:$PATH"
+cd /home/ttle/mrs
+
+./2-run-mb-mdr-real-lpc.sh
